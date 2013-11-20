@@ -8,11 +8,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ReminderOnDemandActivity" >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
-
     <Button
         android:id="@+id/button1"
         android:layout_width="wrap_content"
@@ -20,6 +15,15 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="57dp"
-        android:text="@string/Speak" />
+        android:text="@string/button_name" />
+
+    <TextView
+        style="@style/AppTheme"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="160dp"
+        android:text="@string/reminder" />
 
 </RelativeLayout>
