@@ -7,6 +7,8 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,15 +34,21 @@ public class ReminderOnDemandActivity extends Activity {
         Button speakBtn = (Button)findViewById(R.id.button1);
         speakBtn.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v) {
-            	if (isRecording){
-            		doRecording();   
-            		isRecording = false;
-            	} else{
-            		stopRecording();
-            		addToDB();
-            		isRecording = true;
-            	}
-            		
+//            	if (isRecording){
+//            		doRecording();   
+//            		isRecording = false;
+//            	} else{
+//            		stopRecording();
+//            		addToDB();
+//            		isRecording = true;
+//            	}
+            	MediaPlayer mp = MediaPlayer.create(ReminderOnDemandActivity.this, R.raw.test);	
+            	mp.start();
+            	mp.setOnCompletionListener(new OnCompletionListener(){
+            		public void onCompletion(MediaPlayer mp1){
+            			
+            		}
+            	});
               }
             });
     }
