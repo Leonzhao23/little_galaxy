@@ -26,8 +26,8 @@ public class ReminderOnDemandActivity extends Activity {
 //            	}
 //            	ReplayOnDemand replay = new ReplayOnDemand();
 //            	replay.play(ReminderOnDemandActivity.this);
-            	ReminderOnDemand demand = new ReminderOnDemand();
-            	demand.reminder(ReminderOnDemandActivity.this);
+//            	ReminderOnDemand demand = new ReminderOnDemand();
+//            	demand.reminder(ReminderOnDemandActivity.this);
               }
             });
     }
