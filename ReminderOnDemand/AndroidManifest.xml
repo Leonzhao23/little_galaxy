@@ -26,19 +26,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <receiver android:name="com.little.galaxy.services.ReminderReceiver" >
-            <intent-filter>
-                <action android:name="short" />
-            </intent-filter>
-        </receiver>
         <receiver android:name="com.little.galaxy.services.ReminderOnDemandServiceReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <service android:name="com.little.galaxy.services.ReminderOnDemandService" >
+        <service android:name="com.little.galaxy.services.ReminderOnDemandService" android:exported="true" android:process=":remote">
         </service>
 
         <activity
