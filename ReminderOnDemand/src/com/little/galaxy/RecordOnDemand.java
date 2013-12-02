@@ -22,7 +22,7 @@ public class RecordOnDemand {
     private static final String TAG = "ReminderOnDemand";
     
     public void doRecording(){
-   	 mRecorder = new MediaRecorder();
+   	    mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);

@@ -1,35 +1,48 @@
 package com.little.galaxy;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
 public class ReminderOnDemandActivity extends Activity {
-    //private boolean isRecording = true;
+    private boolean isRecording = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reminder_on_demand);
         Button speakBtn = (Button)findViewById(R.id.button1);
-        speakBtn.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v) {
-//            	if (isRecording){
-//            		doRecording();   
-//            		isRecording = false;
-//            	} else{
-//            		stopRecording();
-//            		addToDB();
-//            		isRecording = true;
-//            	}
-//            	ReplayOnDemand replay = new ReplayOnDemand();
-//            	replay.play(ReminderOnDemandActivity.this);
-//            	ReminderOnDemand demand = new ReminderOnDemand();
-//            	demand.reminder(ReminderOnDemandActivity.this);
-              }
-            });
+       
+        speakBtn.setOnTouchListener(new View.OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				Log.d(getClass().getSimpleName(), "speakBtn Touch event");
+				switch (event.getAction()){
+				case MotionEvent.ACTION_DOWN:
+				{
+					Log.d(getClass().getSimpleName(), "speakBtn Touch event: ACTION_DOWN");
+					//doRecord();
+				}
+				case MotionEvent.ACTION_UP:
+				{
+					Log.d(getClass().getSimpleName(), "speakBtn Touch event: ACTION_UP");
+					//stopRecord();
+					ReminderOnDemandActivity.this.startActivity(new Intent(ReminderOnDemandActivity.this, ReminderOnDemandSettingsActivity.class));
+				}
+				default:
+				 	break;
+				}
+				return false;
+			}
+		});
+        	
+     
     }
 
 
