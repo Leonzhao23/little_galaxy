@@ -11,7 +11,7 @@ public class ReminderOnDemandServiceReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context ctx, Intent intent) {
 		String action = intent.getAction();
-		Log.d(ReminderReceiver.class.getSimpleName(), action);
+		Log.d(this.getClass().getSimpleName(), action);
 		if (action.equals(Intent.ACTION_BOOT_COMPLETED)){
 			ctx.startService(new Intent(ctx, ReminderOnDemandService.class));
 		}
