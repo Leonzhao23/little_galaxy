@@ -7,9 +7,9 @@
         android:title="@string/pref_header_general" />
     <header
         android:fragment="com.little.galaxy.ReminderOnDemandSettingsActivity$NotificationPreferenceFragment"
-        android:title="@string/pref_header_notifications" />
+        android:title="@string/pref_head_interval" />
     <header
         android:fragment="com.little.galaxy.ReminderOnDemandSettingsActivity$DataSyncPreferenceFragment"
-        android:title="@string/pref_header_data_sync" />
+        android:title="@string/pref_head_frequency" />
 
 </preference-headers>

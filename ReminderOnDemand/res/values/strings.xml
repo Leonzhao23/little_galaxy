@@ -5,6 +5,9 @@
     <string name="action_settings">Settings</string>
     <string name="reminder">Reminder On Demand</string>
     <string name="button_name">Speak</string>
-    <string name="button_stop">stop</string>
+    <string name="button_stop">Stop</string>
+    <string name="button_view">View</string>
+    <string name="title_activity_reminder_on_demand_view">ReminderOnDemandViewActivity</string>
+    <string name="reminder_view">View All Reminders</string>
 
 </resources>

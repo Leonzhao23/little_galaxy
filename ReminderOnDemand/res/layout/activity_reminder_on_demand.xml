@@ -8,23 +8,43 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ReminderOnDemandActivity" >
 
-    <TextView
-        style="@style/AppTheme"
+    <Button
+        android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/button1"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="160dp"
-        android:text="@string/reminder" />
+        android:layout_alignLeft="@+id/stop"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="22dp"
+        android:text="@string/button_view" />
 
     <Button
         android:id="@+id/stop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/button2"
         android:layout_alignLeft="@+id/button1"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="65dp"
         android:text="@string/button_stop" />
+
+    <ListView
+        android:id="@+id/reminder_start_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button1"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_alignTop="@+id/textView1"
+        android:layout_marginTop="46dp" >
+
+    </ListView>
+
+    <TextView
+        android:id="@+id/textView1"
+        style="@style/AppTheme"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="18dp"
+        android:text="@string/reminder" />
 
     <Button
         android:id="@+id/button1"
@@ -32,7 +52,6 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/stop"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="18dp"
         android:text="@string/button_name" />
 
 </RelativeLayout>
