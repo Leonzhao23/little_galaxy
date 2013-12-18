@@ -4,33 +4,62 @@ public class ReminderOnDemandEntity {
 	
 	private long id;
 	private String name;
-	private String recored_loc;
-	private long create_time;
-	private int delayed;
+	private String recoredLoc;
+	private long createTime;
+	private long execTime;
+	private int interval;
 	private int frenquecy;
 	private ReminderState state;
 	
 	
-	public ReminderOnDemandEntity(long id, String name, String recored_loc,
-			long create_time, int delayed, int frenquecy, ReminderState state) {
+	public ReminderOnDemandEntity(long id, String name, String recoredLoc,
+			long createTime, long execTime, int interval, int frenquecy, ReminderState state) {
 		super();
 		this.id = id;
 		this.name = name;
-		this.recored_loc = recored_loc;
-		this.create_time = create_time;
-		this.delayed = delayed;
+		this.recoredLoc = recoredLoc;
+		this.createTime = createTime;
+		this.execTime = execTime;
+		this.interval = interval;
 		this.frenquecy = frenquecy;
 		this.state = state;
 	}
 	
-	public ReminderOnDemandEntity(long id, String name, String recored_loc,
-			long create_time, int delayed, int frenquecy, int state) {
+	public ReminderOnDemandEntity(long id, String name, String recoredLoc,
+			long createTime, int interval, int frenquecy, ReminderState state) {
 		super();
 		this.id = id;
 		this.name = name;
-		this.recored_loc = recored_loc;
-		this.create_time = create_time;
-		this.delayed = delayed;
+		this.recoredLoc = recoredLoc;
+		this.createTime = createTime;
+		this.interval = interval;
+		this.frenquecy = frenquecy;
+		this.state = state;
+	}
+	
+	public ReminderOnDemandEntity(long id, String name, String recoredLoc,
+			long createTime, int interval, int frenquecy, int state) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.recoredLoc = recoredLoc;
+		this.createTime = createTime;
+		this.interval = interval;
+		this.frenquecy = frenquecy;
+		this.state = fromInt2ReminderState(state);
+	}
+	
+	
+	
+	public ReminderOnDemandEntity(long id, String name, String recoredLoc,
+			long createTime, long execTime, int interval, int frenquecy, int state) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.recoredLoc = recoredLoc;
+		this.createTime = createTime;
+		this.execTime = execTime;
+		this.interval = interval;
 		this.frenquecy = frenquecy;
 		this.state = fromInt2ReminderState(state);
 	}
@@ -48,23 +77,32 @@ public class ReminderOnDemandEntity {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getRecored_loc() {
-		return recored_loc;
+	public String getRecoredLoc() {
+		return recoredLoc;
 	}
-	public void setRecored_loc(String recored_loc) {
-		this.recored_loc = recored_loc;
+	public void setRecoredLoc(String recoredLoc) {
+		this.recoredLoc = recoredLoc;
 	}
-	public long getCreate_time() {
-		return create_time;
+	public long getCreateTime() {
+		return createTime;
 	}
-	public void setCreate_time(long create_time) {
-		this.create_time = create_time;
+	public void setCreateTime(long createTime) {
+		this.createTime = createTime;
 	}
-	public int getDelayed() {
-		return delayed;
+	
+	public long getExecTime() {
+		return execTime;
 	}
-	public void setDelayed(int delayed) {
-		this.delayed = delayed;
+
+	public void setExecTime(long execTime) {
+		this.execTime = execTime;
+	}
+
+	public int getInterval() {
+		return interval;
+	}
+	public void setInterval(int interval) {
+		this.interval = interval;
 	}
 	public int getFrenquecy() {
 		return frenquecy;
@@ -85,7 +123,7 @@ public class ReminderOnDemandEntity {
 	public String toString() {
 	    StringBuilder sb = new StringBuilder();
 	    sb.append("Reminder Name: " + this.getName());
-	    sb.append(" Reminder Interval: " + this.getDelayed());
+	    sb.append(" Reminder Interval: " + this.getInterval());
 	    return sb.toString();
 	}
 

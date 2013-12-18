@@ -26,6 +26,9 @@ public interface IDBService {
 	
 	public List<ReminderOnDemandEntity> getAllDoneReminders();
 	
+	public List<ReminderOnDemandEntity> getFilterReminders(String[] filters);
 	public void cleanup();
+
+	
 
 }

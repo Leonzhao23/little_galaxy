@@ -26,6 +26,8 @@ public class ReminderOnDemandViewActivity extends ListActivity {
 	private ReminderOnDemandView reminderOnDemandView = null;
 	private List<ReminderOnDemandEntity> reminderOnDemandEntities = null;
 	
+	private String type;
+	
 	private final Handler handler = new Handler() {
         @Override
         public void handleMessage(final Message msg) {
@@ -45,6 +47,7 @@ public class ReminderOnDemandViewActivity extends ListActivity {
         final ListView listView = getListView();
         listView.setItemsCanFocus(false);
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        type = getIntent().getStringExtra("type");
         dbService = DBServiceFactory.getDBService(DBType.SQLite, ReminderOnDemandViewActivity.this);
 	}
 	
@@ -55,7 +58,11 @@ public class ReminderOnDemandViewActivity extends ListActivity {
         new Thread() {
             @Override
             public void run() {
-            	reminderOnDemandEntities = dbService.getAllDoneReminders();
+            	if (type.equals("start")){
+            		reminderOnDemandEntities = dbService.getAllStartReminders();
+            	} else{
+            		reminderOnDemandEntities = dbService.getAllDoneReminders();
+            	}
                 handler.sendEmptyMessage(0);
             }
         }.start();
@@ -73,9 +80,9 @@ public class ReminderOnDemandViewActivity extends ListActivity {
 
 	@Override
 	protected void onDestroy() {
-//		if (dbService != null){
-//			dbService.cleanup();
-//		}
+		if (dbService != null){
+			dbService.cleanup();
+		}
 		super.onDestroy();
 	}
 	

@@ -56,14 +56,14 @@ public class ReminderOnDemandService extends Service {
 		super.onCreate();
 		List <ReminderOnDemandEntity> reminders = dbService.getAllStartReminders();
 		for (ReminderOnDemandEntity reminderOnDemandEntity : reminders) {
-			int delayed  = reminderOnDemandEntity.getDelayed();
-			long create_time = reminderOnDemandEntity.getCreate_time();
+			int interval  = reminderOnDemandEntity.getInterval();
+			long create_time = reminderOnDemandEntity.getCreateTime();
 			long now = System.currentTimeMillis();
 			int slot = (int)(now - create_time);
-			delayed = delayed - slot;
+			interval = interval - slot;
 			timer = new Timer();
 			ReminderOnDemandTimerTask timerTask = new ReminderOnDemandTimerTask(reminderOnDemandEntity);
-			timer.schedule(timerTask, delayed < 0 ? 0:delayed);
+			timer.schedule(timerTask, interval < 0 ? 0:interval);
 		}
 	}
 	
@@ -73,7 +73,7 @@ public class ReminderOnDemandService extends Service {
 		//android.os.Debug.waitForDebugger();
 		List <ReminderOnDemandEntity> reminders = dbService.getAllNewReminders();
 		for (ReminderOnDemandEntity reminderOnDemandEntity : reminders) {
-			int delayed  = reminderOnDemandEntity.getDelayed();
+			int delayed  = reminderOnDemandEntity.getInterval();
 			timer = new Timer();
 			ReminderOnDemandTimerTask timerTask = new ReminderOnDemandTimerTask(reminderOnDemandEntity);
 			Log.d(getClass().getSimpleName(), "delayed=" + delayed);
