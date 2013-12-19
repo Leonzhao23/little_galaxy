@@ -6,12 +6,12 @@
     tools:context=".ReminderOnDemandActivity" >
     
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/reminder_start_text"
         style="@style/AppTheme"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp" 
-        android:text="@string/reminder" />
+        android:text="@string/reminder_start_text" />
     
     <ListView
        android:id="@+id/reminder_start_view"
@@ -32,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp" 
-        android:text="@string/reminder_done" />
+        android:text="@string/reminder_done_text" />
 
     <ListView
         android:id="@+id/reminder_done_view"

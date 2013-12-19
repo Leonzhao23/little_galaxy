@@ -12,11 +12,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -26,6 +29,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.little.galaxy.R;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
@@ -41,6 +46,8 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
     private Button stopBtn = null;
     private Button doneReminderBtn = null;
     private Button startReminderBtn = null;
+    private TextView startTextView = null;
+    private TextView doneTextView = null;
     private ListView reminderStartListView = null;
     private ListView reminderDoneListView = null;
 	private IDBService dbService = null;
@@ -53,6 +60,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 			List<ReminderOnDemandEntity> ReminderOnDemandEntities = dbService.getAllStartReminders();
 			List<Map<String, String>> listMap =  getMapsForSimpleAdaptor(ReminderOnDemandEntities);
 			if (listMap.size() > 0){
+				startTextView.setVisibility(View.VISIBLE);
 				startReminderBtn.setVisibility(View.VISIBLE);
 				  // setup data adapter
 				SimpleAdapter adapter = new SimpleAdapter(ReminderOnDemandActivity.this, listMap, android.R.layout.simple_list_item_2, 
@@ -70,6 +78,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
         public void handleMessage(final Message msg) {
 			List<ReminderOnDemandEntity> ReminderOnDemandEntities = dbService.getFilterReminders(new String[]{"2", "0", "2"});
 			if (ReminderOnDemandEntities.size() > 0){
+				doneTextView.setVisibility(View.VISIBLE);
 				doneReminderBtn.setVisibility(View.VISIBLE);
 				  // setup data adapter
 				ReminderOnDemandView adapter = new ReminderOnDemandView(ReminderOnDemandActivity.this, ReminderOnDemandEntities);
@@ -104,21 +113,27 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reminder_on_demand);
+        
         reminderStartListView = (ListView) findViewById(R.id.reminder_start_view);
         reminderDoneListView = (ListView) findViewById(R.id.reminder_done_view);
-        dbService = DBServiceFactory.getDBService(DBType.SQLite, ReminderOnDemandActivity.this);
-        
-        timer = new Timer();
-        timer.schedule(timerTask, 0, 1*60*100);
-        timer.schedule(timerTask1, 0, 1*60*100);
-        Log.d(getClass().getSimpleName(), "onCreate() invoked, timer.schedule invoked");
-        
+        startTextView = (TextView)findViewById(R.id.reminder_start_text);
+        startTextView.setVisibility(View.INVISIBLE);
+        doneTextView = (TextView)findViewById(R.id.reminder_done_text);
+        doneTextView.setVisibility(View.INVISIBLE);
         speakBtn = (Button)findViewById(R.id.button1);
         stopBtn = (Button)findViewById(R.id.stop);
         startReminderBtn = (Button)findViewById(R.id.button_start);
         startReminderBtn.setVisibility(View.INVISIBLE);
         doneReminderBtn = (Button)findViewById(R.id.button2);
         doneReminderBtn.setVisibility(View.INVISIBLE);
+        
+        dbService = DBServiceFactory.getDBService(DBType.SQLite, ReminderOnDemandActivity.this);
+        
+        timer = new Timer();
+        timer.schedule(timerTask, 0, 1*60*100);
+        timer.schedule(timerTask1, 0, 1*60*100);
+        Log.d(getClass().getSimpleName(), "onCreate() invoked, timer.schedule invoked");
+      
        
         speakBtn.setOnTouchListener(new View.OnTouchListener() {
 			
@@ -129,6 +144,18 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 				case MotionEvent.ACTION_DOWN:
 				{
 					Log.d(getClass().getSimpleName(), "speakBtn Touch event: ACTION_DOWN");
+					 PackageManager pm = getPackageManager();
+				     List<ResolveInfo> list = pm.queryIntentActivities(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+				     if(list.size() > 0)
+				     {
+				        Toast.makeText(ReminderOnDemandActivity.this, "ACTION_RECOGNIZE_SPEECH OK", Toast.LENGTH_LONG).show();
+				        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+						intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+						
+						startActivityForResult(intent,1);
+				     } else{
+				    	 Toast.makeText(ReminderOnDemandActivity.this, "ACTION_RECOGNIZE_SPEECH NG", Toast.LENGTH_LONG).show();
+				     }
 					//doRecord();
 				}
 				case MotionEvent.ACTION_UP:
@@ -209,7 +236,18 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
         return true;
     }
     
-    private List<Map<String, String>> getMapsForSimpleAdaptor(final List<ReminderOnDemandEntity> reminderOnDemandEntities){
+    
+    
+    @Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	if(requestCode==1 && resultCode==RESULT_OK){
+    		   List<String> list = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+    		   
+    	}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	private List<Map<String, String>> getMapsForSimpleAdaptor(final List<ReminderOnDemandEntity> reminderOnDemandEntities){
     	List<Map<String, String>> list = new ArrayList<Map<String, String>>();
     	for(ReminderOnDemandEntity entity: reminderOnDemandEntities){
     		Map<String, String> map = new HashMap<String, String>();
