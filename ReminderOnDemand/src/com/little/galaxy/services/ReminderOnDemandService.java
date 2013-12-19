@@ -5,7 +5,11 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.IBinder;
@@ -19,9 +23,10 @@ import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
 
 public class ReminderOnDemandService extends Service {
-	private ReminderOnDemandBind reminderOnDemandBind;
-	private MediaPlayer mp;
-	private Timer timer;
+	private ReminderOnDemandBind reminderOnDemandBind = null;
+	private NotificationManager nm = null;
+	private MediaPlayer mp = null;
+	private Timer timer = null;
 	private IDBService dbService = null;
 	
 	private class ReminderOnDemandTimerTask extends TimerTask{
@@ -37,6 +42,8 @@ public class ReminderOnDemandService extends Service {
 
 		@Override
 		public void run() {
+			
+			sendNotification(R.drawable.ic_launcher, entity.getName(), entity.getRecoredLoc());
 			mp = MediaPlayer.create(ReminderOnDemandService.this, R.raw.test);	
 			reminderOnDemandBind = new ReminderOnDemandBind();
 			try {
@@ -52,8 +59,9 @@ public class ReminderOnDemandService extends Service {
 	@Override
 	public void onCreate(){
 		//android.os.Debug.waitForDebugger();
-		dbService = DBServiceFactory.getDBService(DBType.SQLite, ReminderOnDemandService.this);
 		super.onCreate();
+		nm = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+		dbService = DBServiceFactory.getDBService(DBType.SQLite, ReminderOnDemandService.this);
 		List <ReminderOnDemandEntity> reminders = dbService.getAllStartReminders();
 		for (ReminderOnDemandEntity reminderOnDemandEntity : reminders) {
 			int interval  = reminderOnDemandEntity.getInterval();
@@ -73,11 +81,11 @@ public class ReminderOnDemandService extends Service {
 		//android.os.Debug.waitForDebugger();
 		List <ReminderOnDemandEntity> reminders = dbService.getAllNewReminders();
 		for (ReminderOnDemandEntity reminderOnDemandEntity : reminders) {
-			int delayed  = reminderOnDemandEntity.getInterval();
+			int interval  = reminderOnDemandEntity.getInterval();
 			timer = new Timer();
 			ReminderOnDemandTimerTask timerTask = new ReminderOnDemandTimerTask(reminderOnDemandEntity);
-			Log.d(getClass().getSimpleName(), "delayed=" + delayed);
-			timer.schedule(timerTask, delayed);
+			Log.d(getClass().getSimpleName(), "delayed=" + interval);
+			timer.schedule(timerTask, interval);
 			dbService.updateByState(reminderOnDemandEntity, ReminderOnDemandEntity.ReminderState.Start.getState());
 		}
 		return super.onStartCommand(intent, flags, startId);
@@ -110,5 +118,15 @@ public class ReminderOnDemandService extends Service {
 		super.onDestroy();
 	}
 	
+	private void sendNotification(int id, String text, String desc){
+		Intent notifyIntent = new Intent(ReminderOnDemandService.this, ReminderOnDemandService.class);
+		PendingIntent pendingIntent = PendingIntent.getActivity(ReminderOnDemandService.this, 0, notifyIntent, 0);
+		Notification notification = new Notification();
+		notification.icon = id;
+		notification.tickerText = text;
+		notification.defaults = Notification.DEFAULT_ALL;
+		notification.setLatestEventInfo(ReminderOnDemandService.this, text, desc, pendingIntent);
+		nm.notify(0, notification);
+	}
 
 }
