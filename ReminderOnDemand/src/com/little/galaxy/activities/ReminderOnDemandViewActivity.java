@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
@@ -31,7 +32,7 @@ public class ReminderOnDemandViewActivity extends ListActivity {
 	private final Handler handler = new Handler() {
         @Override
         public void handleMessage(final Message msg) {
-            Log.v(this.getClass().getSimpleName(), " worker thread done, setup ReviewAdapter");
+            Log.d(this.getClass().getSimpleName(), " worker thread done, setup ReviewAdapter");
             progressDialog.dismiss();
             reminderOnDemandView = new ReminderOnDemandView(ReminderOnDemandViewActivity.this, reminderOnDemandEntities);
             setListAdapter(reminderOnDemandView);
@@ -42,7 +43,7 @@ public class ReminderOnDemandViewActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_reminder_on_demand_view);
+		//setContentView(R.layout.activity_reminder_on_demand_view);
 		 // set list properties
         final ListView listView = getListView();
         listView.setItemsCanFocus(false);
@@ -66,6 +67,28 @@ public class ReminderOnDemandViewActivity extends ListActivity {
                 handler.sendEmptyMessage(0);
             }
         }.start();
+	}
+	
+	@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+    	 menu.add(0, Menu.FIRST, 0, "item 1");
+    	 menu.add(0, Menu.FIRST + 1, 0, "item 2");
+       // getMenuInflater().inflate(R.menu.reminder_on_demand, menu);
+        return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()){
+		case Menu.FIRST:
+			 Log.d(this.getClass().getSimpleName(), " First item selected!");
+			 break;
+		case Menu.FIRST+1:
+			 Log.d(this.getClass().getSimpleName(), " Second item selected");
+		}
+		
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
