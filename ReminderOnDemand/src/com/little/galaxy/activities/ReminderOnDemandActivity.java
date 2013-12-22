@@ -15,12 +15,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v4.view.PagerTitleStrip;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.Menu;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -28,17 +31,18 @@ import android.widget.SimpleAdapter;
 
 import com.little.galaxy.R;
 import com.little.galaxy.RecordOnDemand;
+import com.little.galaxy.adaptors.ReminderOnDemandListViewAdaptor;
+import com.little.galaxy.adaptors.ReminderOnDemandPagerAdaptor;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.services.IPlayService;
-import com.little.galaxy.storages.DBServiceFactory;
-import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
-import com.little.galaxy.views.ReminderOnDemandView;
 
 public class ReminderOnDemandActivity extends Activity implements OnItemClickListener {
 
     private ImageButton speakBtn = null;
-    private Button stopBtn = null;
+    private ViewPager viewPager;
+    private PagerTitleStrip title;
+    private ArrayList<View> pagesArrayList;
     private Button doneReminderBtn = null;
     private Button startReminderBtn = null;
     private ListView reminderStartListView = null;
@@ -70,14 +74,11 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 		@Override
         public void handleMessage(final Message msg) {
 			List<ReminderOnDemandEntity> ReminderOnDemandEntities = dbService.getFilterReminders(new String[]{"2", "0", "5"});
-			if (ReminderOnDemandEntities.size() > 0){
-				doneReminderBtn.setVisibility(View.VISIBLE);
-				  // setup data adapter
-				ReminderOnDemandView adapter = new ReminderOnDemandView(ReminderOnDemandActivity.this, ReminderOnDemandEntities);
-		        // assign adapter to list view
-				reminderDoneListView.setAdapter(adapter);
-				
-			}
+			// setup data adapter
+			ReminderOnDemandListViewAdaptor adaptor = new ReminderOnDemandListViewAdaptor(ReminderOnDemandActivity.this, ReminderOnDemandEntities);
+	        // assign adapter to list view
+			reminderDoneListView.setAdapter(adaptor);
+			pagesArrayList.add(reminderDoneListView);
 	      
         }
 		
@@ -105,21 +106,50 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reminder_on_demand);
+        pagesArrayList = new ArrayList<View>();
+        
+        
+        LayoutInflater layoutInflater=getLayoutInflater();
+        viewPager = (ViewPager)findViewById(R.id.viewPager);
+        title = (PagerTitleStrip)findViewById(R.id.pagerTitle);
+        
+        ArrayList<String> titles = new ArrayList<String>();
+        titles.add(getResources().getString(R.string.reminder_start_text));
+        titles.add(getResources().getString(R.string.reminder_done_text));
+
+        
+        ListView listView=(ListView)
+                (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
+        ArrayAdapter<String> arrrayAdapter=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new String[]{"a","b"});
+        listView.setAdapter(arrrayAdapter);
+        pagesArrayList.add(listView);
+        
+        listView=(ListView)
+                (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
+        ArrayAdapter<String> arrrayAdapter1=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new String[]{"c","d"});
+        listView.setAdapter(arrrayAdapter1);
+        pagesArrayList.add(listView);
+        
         //reminderStartListView = (ListView) findViewById(R.id.reminder_start_view);
-        reminderDoneListView = (ListView) findViewById(R.id.reminder_done_view);
-        dbService = DBServiceFactory.getDBService(DBType.SQLite, ReminderOnDemandActivity.this);
-        recordOnDemand = new RecordOnDemand(this);
-        timer = new Timer();
-        //timer.schedule(timerTask, 0, 1*60*100);
-        timer.schedule(timerTask1, 0, 1*60*1000);
+//        reminderDoneListView = (ListView) (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
+//       
+//        dbService = DBServiceFactory.getDBService(DBType.SQLite, ReminderOnDemandActivity.this);
+//        recordOnDemand = new RecordOnDemand(this);
+//        
+//        timer = new Timer();
+////        //timer.schedule(timerTask, 0, 1*60*100);
+//        timer.schedule(timerTask1, 0, 1*60*100);
         Log.d(getClass().getSimpleName(), "onCreate() invoked, timer.schedule invoked");
+        
+        viewPager.setAdapter(new ReminderOnDemandPagerAdaptor(pagesArrayList, titles));
+        viewPager.setCurrentItem(0);
         
         speakBtn = (ImageButton)findViewById(R.id.button1);
        // stopBtn = (Button)findViewById(R.id.stop);
         //startReminderBtn = (Button)findViewById(R.id.button_start);
         //startReminderBtn.setVisibility(View.INVISIBLE);
-        doneReminderBtn = (Button)findViewById(R.id.button2);
-        doneReminderBtn.setVisibility(View.INVISIBLE);
+       // doneReminderBtn = (Button)findViewById(R.id.button2);
+        //doneReminderBtn.setVisibility(View.INVISIBLE);
        
         speakBtn.setOnTouchListener(new View.OnTouchListener() {
 			
@@ -173,16 +203,16 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 //				ReminderOnDemandActivity.this.startActivity(intent);
 //			}
 //		});
-        
-        doneReminderBtn.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(ReminderOnDemandActivity.this, ReminderOnDemandViewActivity.class);
-				intent.putExtra("type", "done");
-				ReminderOnDemandActivity.this.startActivity(intent);
-			}
-		});
+//        
+//        doneReminderBtn.setOnClickListener(new View.OnClickListener() {
+//			
+//			@Override
+//			public void onClick(View v) {
+//				Intent intent = new Intent(ReminderOnDemandActivity.this, ReminderOnDemandViewActivity.class);
+//				intent.putExtra("type", "done");
+//				ReminderOnDemandActivity.this.startActivity(intent);
+//			}
+//		});
         
         
         	

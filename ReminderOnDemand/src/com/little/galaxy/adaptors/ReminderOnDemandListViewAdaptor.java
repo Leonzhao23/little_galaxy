@@ -1,4 +1,4 @@
-package com.little.galaxy.views;
+package com.little.galaxy.adaptors;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,12 +19,12 @@ import com.little.galaxy.storages.DBServiceFactory;
 import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
 
-public class ReminderOnDemandView extends BaseAdapter {
+public class ReminderOnDemandListViewAdaptor extends BaseAdapter {
 	
 	private final Context context;
 	private final List<ReminderOnDemandEntity> reminderOnDemandEntities;
 	
-	public ReminderOnDemandView(Context context, List<ReminderOnDemandEntity> reminderOnDemandEntities){
+	public ReminderOnDemandListViewAdaptor(Context context, List<ReminderOnDemandEntity> reminderOnDemandEntities){
 		this.context = context;
 		this.reminderOnDemandEntities = reminderOnDemandEntities;
 	}

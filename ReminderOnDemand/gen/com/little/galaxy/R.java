@@ -39,10 +39,11 @@ public final class R {
     }
     public static final class id {
         public static final int button1=0x7f0b0002;
-        public static final int button2=0x7f0b0001;
-        public static final int desc=0x7f0b0004;
-        public static final int reminder_done_view=0x7f0b0000;
-        public static final int subject=0x7f0b0003;
+        public static final int desc=0x7f0b0005;
+        public static final int listView=0x7f0b0003;
+        public static final int pagerTitle=0x7f0b0001;
+        public static final int subject=0x7f0b0004;
+        public static final int viewPager=0x7f0b0000;
     }
     public static final class layout {
         public static final int activity_reminder_on_demand=0x7f030000;

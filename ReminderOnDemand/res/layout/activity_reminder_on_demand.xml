@@ -1,25 +1,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    tools:context=".ReminderOnDemandActivity" >    
+    tools:context=".ReminderOnDemandActivity" >
     
-    <ListView
-        android:id="@+id/reminder_done_view"
-        android:layout_width="wrap_content"
-        android:layout_height="0dip"
-        android:layout_weight="0.5" >
-
-    </ListView>
-    <Button
-        android:id="@+id/button2"
-        android:text="@string/reminder_done_more"
-        android:layout_width="fill_parent"
-        android:background="#FFFFFF"
-        android:gravity="left"
-		android:layout_height="30dp"/>
-
+   <android.support.v4.view.ViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="fill_parent"
+            android:layout_height="0dip"
+            android:layout_weight="0.8">
+            <android.support.v4.view.PagerTitleStrip
+            android:id="@+id/pagerTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top" />
+   </android.support.v4.view.ViewPager>
+       
+   
+   
    <LinearLayout
        android:layout_width="fill_parent"
        android:layout_height="wrap_content"
