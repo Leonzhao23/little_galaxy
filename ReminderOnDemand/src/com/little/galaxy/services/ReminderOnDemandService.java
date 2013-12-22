@@ -12,6 +12,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -21,6 +22,8 @@ import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.storages.DBServiceFactory;
 import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
+import static com.little.galaxy.utils.ReminderOnDemandConsts.RECORD_EXTENSION;
+import static com.little.galaxy.utils.ReminderOnDemandConsts.RECORD_PREFIX;
 
 public class ReminderOnDemandService extends Service {
 	private ReminderOnDemandBind reminderOnDemandBind = null;
@@ -32,11 +35,14 @@ public class ReminderOnDemandService extends Service {
 	private class ReminderOnDemandTimerTask extends TimerTask{
 		
 		private ReminderOnDemandEntity entity;
+		private Uri recordLoc;
 
 		public ReminderOnDemandTimerTask(ReminderOnDemandEntity entity) {
 			super();
 			this.entity = entity;
-			//this.recordLoc = Uri.parse("android.resource://ReminderOnDemand/raw/test.mp3"); 		
+			this.recordLoc = Uri.parse("file://" + 
+								entity.getRecoredLoc()
+								); 		
 		}
 
 
@@ -44,7 +50,7 @@ public class ReminderOnDemandService extends Service {
 		public void run() {
 			
 			sendNotification(R.drawable.ic_launcher, entity.getName(), entity.getRecoredLoc());
-			mp = MediaPlayer.create(ReminderOnDemandService.this, R.raw.test);	
+			mp = MediaPlayer.create(ReminderOnDemandService.this, recordLoc);	
 			reminderOnDemandBind = new ReminderOnDemandBind();
 			try {
 				reminderOnDemandBind.play();

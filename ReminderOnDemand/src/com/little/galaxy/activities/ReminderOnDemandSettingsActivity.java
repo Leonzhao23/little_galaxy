@@ -276,12 +276,12 @@ public class ReminderOnDemandSettingsActivity extends PreferenceActivity {
 	private class StartServiceThread extends Thread{
 		public void run(){
 			 long id = System.currentTimeMillis();
-			 String record_loc = "dd";
+			 String recordLoc = ReminderOnDemandSettingsActivity.this.getIntent().getStringExtra("recordLoc");
 			 //String frequency = (String) findPreference("freqency").getTitle();
 			 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ReminderOnDemandSettingsActivity.this);
-			 int interval = prefs.getInt("interval", 15*60);
+			 int interval = prefs.getInt("interval", 15*60*1000);
 			 String name = prefs.getString("name", "");
-			 ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, record_loc, id, interval*60, 1/*frequency=1*/, 0/*state new*/);
+			 ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, id, interval*60*1000, 1/*frequency=1*/, 0/*state new*/);
 			 dbService.insert(entity);
 			 ReminderOnDemandSettingsActivity.this.startService(new Intent(ReminderOnDemandSettingsActivity.this, ReminderOnDemandService.class));
 			 startServiceHandler.sendEmptyMessage(1);

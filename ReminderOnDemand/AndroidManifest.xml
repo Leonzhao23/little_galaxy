@@ -7,10 +7,11 @@
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="18" />
-
+    
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
     <application
         android:allowBackup="true"
@@ -20,11 +21,6 @@
         <activity
             android:name="com.little.galaxy.activities.ReminderOnDemandActivity"
             android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <receiver android:name="com.little.galaxy.services.ReminderOnDemandServiceReceiver" >
@@ -46,6 +42,13 @@
         <activity
             android:name="com.little.galaxy.activities.ReminderOnDemandViewActivity"
             android:label="@string/title_activity_reminder_on_demand_view" >
+        </activity>
+        <activity
+            android:name="com.little.galaxy.activities.SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

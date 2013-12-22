@@ -3,42 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ReminderOnDemandActivity" >
+    tools:context=".ReminderOnDemandActivity" >    
     
-    <TextView
-        android:id="@+id/reminder_start_text"
-        style="@style/AppTheme"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp" 
-        android:text="@string/reminder_start_text" />
-    
-    <ListView
-       android:id="@+id/reminder_start_view"
-       android:layout_width="wrap_content"
-       android:layout_height="0dip"
-       android:layout_weight="0.5" >
-    </ListView>  
-    <Button
-        android:id="@+id/button_start"
-        android:text="@string/reminder_start_more"
-        android:background="#FFFFFF"
-        android:gravity="left"
-        android:layout_width="fill_parent"
-		android:layout_height="30dp"/>
-    
-    <TextView
-        android:id="@+id/reminder_done_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp" 
-        android:text="@string/reminder_done_text" />
-
     <ListView
         android:id="@+id/reminder_done_view"
         android:layout_width="wrap_content"
         android:layout_height="0dip"
-        android:layout_weight="0.5">
+        android:layout_weight="0.5" >
+
     </ListView>
     <Button
         android:id="@+id/button2"
@@ -48,25 +20,21 @@
         android:gravity="left"
 		android:layout_height="30dp"/>
 
-   <LinearLayout 
-      	android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="40dp"
-		android:layout_marginTop="5dp"
-		android:layout_marginBottom="5dp">
-        <Button 
-        android:id="@+id/button1"
-        android:text="@string/button_name"
-        android:layout_width="wrap_content"
-		android:layout_height="40dp"
-		android:layout_weight="1"/>
-        
-    	<Button
-        android:id="@+id/stop"
-        android:text="@string/button_stop"
-        android:layout_width="wrap_content"
-		android:layout_height="40dp"
-		android:layout_weight="1"/>
+   <LinearLayout
+       android:layout_width="fill_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="5dp"
+       android:orientation="vertical"
+       android:scaleType="fitCenter" >
+     
+       <ImageButton
+           android:id="@+id/button1"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_gravity="center_vertical|center_horizontal"
+           android:src="@drawable/speak_down" />
+     
+
     </LinearLayout>
     
 </LinearLayout>

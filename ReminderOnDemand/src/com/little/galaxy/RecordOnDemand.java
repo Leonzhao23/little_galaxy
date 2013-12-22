@@ -15,13 +15,37 @@ import android.util.Log;
 
 public class RecordOnDemand {
 	
+	private Context ctx;
 	MediaRecorder mRecorder;
 	File mSampleFile = null;
 	static final String SAMPLE_PREFIX = "ReminderOnDemandRecord";
 	static final String SAMPLE_EXTENSION = ".mp3"; 
-    private static final String TAG = "ReminderOnDemand";
+    private static final String TAG = "RecordOnDemand";
     
-    public void doRecording(){
+    public RecordOnDemand(Context ctx) {
+		super();
+		this.ctx = ctx;
+	}
+
+	public void doRecording(){
+    	if (mSampleFile == null) {
+    		  //try SD card first
+	          File sDDir = Environment.getExternalStorageDirectory();
+	          if (sDDir.exists() && sDDir.canWrite()){
+	        	  try { 
+		        	  mSampleFile = File.createTempFile(SAMPLE_PREFIX, SAMPLE_EXTENSION, sDDir);
+		          } catch (IOException e) {
+		              Log.e(TAG,"sdcard access error");
+		          }
+	          } else{//internal storage
+	        	  try {
+					mSampleFile = File.createTempFile(SAMPLE_PREFIX, SAMPLE_EXTENSION, ctx.getFilesDir());
+				} catch (IOException e) {
+					Log.e(TAG,"internal storage access error");
+				}
+	          }
+        }
+    	Log.d(TAG, "record file to " + mSampleFile.getAbsolutePath());
    	    mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -35,21 +59,16 @@ public class RecordOnDemand {
 			e1.printStackTrace();
 		}
         mRecorder.start();
-
-        if (mSampleFile == null) {
-	          File sampleDir = Environment.getExternalStorageDirectory();
-	        
-	          try { mSampleFile = File.createTempFile(SAMPLE_PREFIX, SAMPLE_EXTENSION, sampleDir);
-	          } catch (IOException e) {
-	              Log.e(TAG,"sdcard access error");
-	              return;
-	          }
-        }
    }
    
-   public void stopRecording(){
+   public String stopRecording(){
 	   mRecorder.stop();
 	   mRecorder.release();
+	   if (mSampleFile.exists()){
+		   Log.d(TAG, "record as " + mSampleFile.getAbsolutePath());
+		   return mSampleFile.getAbsolutePath();
+	   }
+	   return null;
    }
    
    protected void persist(Context ctx) {
