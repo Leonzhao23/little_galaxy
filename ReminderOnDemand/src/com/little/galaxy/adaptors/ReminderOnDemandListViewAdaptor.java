@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.little.galaxy.R;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.storages.DBServiceFactory;
 import com.little.galaxy.storages.DBType;
@@ -64,7 +65,7 @@ public class ReminderOnDemandListViewAdaptor extends BaseAdapter {
 
 	            super(context);
 	            btn = new ImageButton(context);
-	            btn.setImageDrawable((getResources().getDrawable(android.R.drawable.sym_call_incoming)));
+	            btn.setImageDrawable((getResources().getDrawable(R.drawable.done_view_delete)));
 	            btn.setOnClickListener(new View.OnClickListener() {
 	    			@Override
 	    			public void onClick(View v) {
@@ -79,7 +80,7 @@ public class ReminderOnDemandListViewAdaptor extends BaseAdapter {
 	            
 	            LayoutParams childBtnParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 	            childBtnParams.gravity = Gravity.RIGHT;
-	            childBtnParams.setMargins(100, 5, 0, 0);
+	            childBtnParams.setMargins(150, 5, 0, 0);	  
 	           
 	            
 	            LinearLayout childLayout = new LinearLayout(context);

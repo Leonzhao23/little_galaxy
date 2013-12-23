@@ -10,10 +10,9 @@
             android:layout_width="fill_parent"
             android:layout_height="0dip"
             android:layout_weight="0.8">
-            <android.support.v4.view.PagerTitleStrip
-            android:id="@+id/pagerTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            <android.support.v4.view.PagerTabStrip    
+            android:layout_width="wrap_content"    
+            android:layout_height="wrap_content"    
             android:layout_gravity="top" />
    </android.support.v4.view.ViewPager>
        

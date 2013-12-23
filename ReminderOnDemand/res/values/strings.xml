@@ -3,16 +3,14 @@
 
     <string name="app_name">ReminderOnDemand</string>
     <string name="action_settings">Settings</string>
-    <string name="menu_start">Start</string>
-    <string name="menu_done">done</string>
-    <string name="reminder_start_text">Coming reminders within 5 minutes</string>
     <string name="button_name">Hold and Speak</string>
     <string name="button_stop">Stop</string>
     <string name="reminder_done_more">More ...</string>
     <string name="reminder_start_more">More ...</string>
     <string name="title_activity_reminder_on_demand_view">ReminderOnDemandViewActivity</string>
     <string name="reminder_view">View All Reminders</string>
-    <string name="reminder_done_text">Showing the latest done reminders</string>
+    <string name="reminder_start_text">New reminders</string>
+    <string name="reminder_done_text">Completed reminders</string>
     <string name="reminder_start_view_subject">Subject</string>
     <string name="reminder_start_view_desc">Description</string>
 

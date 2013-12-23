@@ -21,13 +21,13 @@ public class ReminderOnDemandPagerAdaptor extends PagerAdapter {
 
 	@Override
 	public int getCount() {
-		return listViews.size();
+		return listViews == null? 0 : listViews.size();
 	}
 	
 
 	@Override
 	public CharSequence getPageTitle(int position) {
-		return titles.get(position);
+		return titles == null? "" : titles.get(position);
 	}
 
 	@Override
@@ -36,6 +36,12 @@ public class ReminderOnDemandPagerAdaptor extends PagerAdapter {
 		return arg0 == arg1;
 	}
 	
+	@Override
+	public void destroyItem(ViewGroup container, int position, Object object) {
+		container.removeView(listViews.get(position));  
+		super.destroyItem(container, position, object);
+	}
+
 	@Override
     public Object instantiateItem(View arg0, int arg1) {
         Log.d("instantiateItem", ""+arg0+" "+arg1);
@@ -51,6 +57,8 @@ public class ReminderOnDemandPagerAdaptor extends PagerAdapter {
             e.printStackTrace();  
         }  
         return listViews.get(arg1);
+//		((ViewPager) arg0).addView(listViews.get(arg1));  
+//        return listViews.get(arg1);  
     }
 
 }
