@@ -17,6 +17,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.little.galaxy.R;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
@@ -39,15 +40,6 @@ public class ReminderOnDemandSettingsActivity extends PreferenceActivity {
 	 */
 	private static final boolean ALWAYS_SIMPLE_PREFS = false;
 	private IDBService dbService = null;
-	
-	private Handler startServiceHandler = new Handler() {
-		 @Override
-	        public void handleMessage(Message msg) {
-			 if (msg.what == 1){
-				 dbService.cleanup();  			 
-			 }	 
-		 }
-	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,36 +52,36 @@ public class ReminderOnDemandSettingsActivity extends PreferenceActivity {
 		super.onPostCreate(savedInstanceState);
 		setupSimplePreferencesScreen();
 	}	
-	
-	@Override
-	protected void onStart() {
-		super.onStart();
-		
-	}
-	
-
-	@Override
-	protected void onPause() {
-		// TODO Auto-generated method stub
-		super.onPause();
-	}
-
-	@Override
-	protected void onResume() {
-		// TODO Auto-generated method stub
-		super.onResume();
-	}
 
 	@Override
 	protected void onStop(){
 		super.onStop();
-		StartServiceThread startServiceThread = new StartServiceThread();
-		startServiceThread.start();
+//		StartServiceThread startServiceThread = new StartServiceThread();
+//		startServiceThread.start();
+		long id = System.currentTimeMillis();
+		String recordLoc = ReminderOnDemandSettingsActivity.this.getIntent().getStringExtra("recordLoc");
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ReminderOnDemandSettingsActivity.this);
+		String name = prefs.getString("name", "Default");
+		String getStr = prefs.getString("interval", "");
+		int interval = 15*60*1000;
+		try{
+			interval = Integer.parseInt(getStr);
+		}catch(NumberFormatException nfe){
+			Log.w(this.getClass().getSimpleName(), "parse string to int error, use default value 15mins");
+		}
+		
+		ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, id, interval*60*1000, 1/*frequency=1*/, 0/*state new*/);
+		dbService.insert(entity);
+		Intent intent = new Intent(ReminderOnDemandSettingsActivity.this, ReminderOnDemandService.class);
+		ReminderOnDemandSettingsActivity.this.startService(intent);
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		if (dbService != null){
+			dbService.cleanup();
+		}
 	}
 
 	/**
@@ -273,18 +265,17 @@ public class ReminderOnDemandSettingsActivity extends PreferenceActivity {
 		}
 	}
 	
-	private class StartServiceThread extends Thread{
-		public void run(){
-			 long id = System.currentTimeMillis();
-			 String recordLoc = ReminderOnDemandSettingsActivity.this.getIntent().getStringExtra("recordLoc");
-			 //String frequency = (String) findPreference("freqency").getTitle();
-			 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ReminderOnDemandSettingsActivity.this);
-			 int interval = prefs.getInt("interval", 15*60*1000);
-			 String name = prefs.getString("name", "");
-			 ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, id, interval*60*1000, 1/*frequency=1*/, 0/*state new*/);
-			 dbService.insert(entity);
-			 ReminderOnDemandSettingsActivity.this.startService(new Intent(ReminderOnDemandSettingsActivity.this, ReminderOnDemandService.class));
-			 startServiceHandler.sendEmptyMessage(1);
-		}
-	}
+//	private class StartServiceThread extends Thread{
+//		public void run(){
+//			 long id = System.currentTimeMillis();
+//			 String recordLoc = ReminderOnDemandSettingsActivity.this.getIntent().getStringExtra("recordLoc");
+//			 //String frequency = (String) findPreference("freqency").getTitle();
+//			 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ReminderOnDemandSettingsActivity.this);
+//			 int interval = prefs.getInt("interval", 15*60*1000);
+//			 String name = prefs.getString("name", "");
+//			 ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, id, interval*60*1000, 1/*frequency=1*/, 0/*state new*/);
+//			 dbService.insert(entity);
+//			 ReminderOnDemandSettingsActivity.this.startService(new Intent(ReminderOnDemandSettingsActivity.this, ReminderOnDemandService.class));
+//		}
+//	}
 }

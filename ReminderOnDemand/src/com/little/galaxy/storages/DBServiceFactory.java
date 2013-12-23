@@ -8,7 +8,6 @@ public class DBServiceFactory {
 	
 	public static IDBService getDBService(final DBType type, final Context ctx){	
 		synchronized (DBServiceFactory.class){
-			if (service == null){
 				switch (type){
 				case SQLite:
 					service = new SQLiteDBService(ctx);
@@ -16,7 +15,6 @@ public class DBServiceFactory {
 				case MYSQL:
 				case BERKLYDB:
 				}
-			}
 		}
 		return service;
 	}

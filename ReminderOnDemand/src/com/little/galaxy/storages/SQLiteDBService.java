@@ -116,18 +116,20 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	        ArrayList<ReminderOnDemandEntity> ret = new ArrayList<ReminderOnDemandEntity>();
 	        try {
 	            c = this.db.query(DB_TABLE, COLS, "state=0", null, null, null, null);
-	            int numRows = c.getCount();
-	            c.moveToFirst();
-	            for (int i = 0; i < numRows; ++i) {
-	            	long id = c.getLong(0);
-	            	String name = c.getString(1);
-	            	String record_loc = c.getString(2);
-	            	int createTime = c.getInt(3);
-	            	int delayed = c.getInt(4);
-	            	int interval = c.getInt(5);
-	            	int state = c.getInt(6);
-	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, record_loc, createTime, delayed, interval, state);
-	            	ret.add(entity);
+	            if (c != null){
+	            	int numRows = c.getCount();
+		            c.moveToFirst();
+		            for (int i = 0; i < numRows; ++i) {
+		            	long id = c.getLong(0);
+		            	String name = c.getString(1);
+		            	String record_loc = c.getString(2);
+		            	long createTime = c.getLong(3);
+		            	int interval = c.getInt(5);
+		            	int frequency = c.getInt(6);
+		            	int state = c.getInt(7);
+		            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, record_loc, createTime, interval, frequency, state);
+		            	ret.add(entity);
+		            }
 	            }
 	        } catch (SQLException e) {
 	            Log.v(CLASSNAME, CLASSNAME, e);
@@ -145,21 +147,23 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 		 ArrayList<ReminderOnDemandEntity> ret = new ArrayList<ReminderOnDemandEntity>();
 	        try {
 	            c = this.db.query(DB_TABLE, COLS, "state=1", null, null, null, null);
-	            int numRows = c.getCount();
-	            c.moveToFirst();
-	            for (int i = 0; i < numRows; ++i) {
-	            	long id = c.getLong(0);
-	            	String name = c.getString(1);
-	            	String recordLoc = c.getString(2);
-	            	int createTime = c.getInt(3);
-	            	int interval = c.getInt(5);
-	            	int frequency = c.getInt(6);
-	            	int state = c.getInt(7);
-	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, createTime, interval, frequency, state);
-	            	ret.add(entity);
+	            if (c != null){
+	            	 int numRows = c.getCount();
+	 	            c.moveToFirst();
+	 	            for (int i = 0; i < numRows; ++i) {
+	 	            	long id = c.getLong(0);
+	 	            	String name = c.getString(1);
+	 	            	String recordLoc = c.getString(2);
+	 	            	long createTime = c.getLong(3);
+	 	            	int interval = c.getInt(5);
+	 	            	int frequency = c.getInt(6);
+	 	            	int state = c.getInt(7);
+	 	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, createTime, interval, frequency, state);
+	 	            	ret.add(entity);
+	                }
 	            }
 	        } catch (SQLException e) {
-	            Log.v(CLASSNAME, CLASSNAME, e);
+	            Log.e(CLASSNAME, CLASSNAME, e);
 	        } finally {
 	            if (c != null && !c.isClosed()) {
 	                c.close();
@@ -174,19 +178,22 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	        ArrayList<ReminderOnDemandEntity> ret = new ArrayList<ReminderOnDemandEntity>();
 	        try {
 	            c = this.db.query(DB_TABLE, COLS, "state=2", null, null, null, null);
-	            int numRows = c.getCount();
-	            c.moveToFirst();
-	            for (int i = 0; i < numRows; ++i) {
-	            	long id = c.getLong(0);
-	            	String name = c.getString(1);
-	            	String record_loc = c.getString(2);
-	            	int createTime = c.getInt(3);
-	            	int delayed = c.getInt(4);
-	            	int interval = c.getInt(5);
-	            	int state = c.getInt(6);
-	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, record_loc, createTime, delayed, interval, state);
-	            	ret.add(entity);
-	            }
+	            if (c != null){
+	            	int numRows = c.getCount();
+		            c.moveToFirst();
+		            for (int i = 0; i < numRows; ++i) {
+		            	long id = c.getLong(0);
+		            	String name = c.getString(1);
+		            	String recordLoc = c.getString(2);
+		            	long createTime = c.getLong(3);
+		            	long execTime = c.getLong(4);
+		            	int interval = c.getInt(5);
+		            	int frequency = c.getInt(6);
+		            	int state = c.getInt(7);
+		            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, createTime, execTime, interval, frequency, state);
+		            	ret.add(entity);
+		            }
+	            }      
 	        } catch (SQLException e) {
 	            Log.v(CLASSNAME, CLASSNAME, e);
 	        } finally {
@@ -219,7 +226,7 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	            	ret.add(entity);
 	            }
 	        } catch (SQLException e) {
-	            Log.v(CLASSNAME, CLASSNAME, e);
+	            Log.e(CLASSNAME, CLASSNAME, e);
 	        } finally {
 	            if (c != null && !c.isClosed()) {
 	                c.close();

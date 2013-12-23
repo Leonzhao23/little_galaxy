@@ -49,7 +49,7 @@ public class ReminderOnDemandListViewAdaptor extends BaseAdapter {
 	public View getView(int position, View view, ViewGroup viewGroup) {
 		ReminderOnDemandEntity entity = reminderOnDemandEntities.get(position);
 		SimpleDateFormat sdf=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-		Date date = new Date(entity.getCreateTime() + entity.getInterval());
+		Date date = new Date(entity.getExecTime());
 		String formatDate = sdf.format(date);
 		String desc = "Remindered at " + formatDate;
 		return new ReminderOnDemandViewLayout(this.context, entity.getId(), entity.getName(), desc);
