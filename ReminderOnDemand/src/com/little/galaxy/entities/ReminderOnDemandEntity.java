@@ -131,7 +131,8 @@ public class ReminderOnDemandEntity {
 	public enum ReminderState{
 		New(0),
 		Start(1),
-		Done(2);
+		Done(2),
+		Cancel(3);
 		
 		int state;
 		ReminderState(int state){
@@ -152,6 +153,8 @@ public class ReminderOnDemandEntity {
 			return ReminderState.Start;
 		case 2: 
 			return ReminderState.Done;
+		case 3:
+			return ReminderState.Cancel;
 		}
 		return null;
 	}

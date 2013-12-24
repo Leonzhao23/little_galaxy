@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.little.galaxy.entities.ReminderOnDemandEntity;
+import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_DB;
 
 public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 
@@ -89,12 +90,14 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	
 	@Override
 	public boolean updateByState(final ReminderOnDemandEntity entity, final int state) {
+		Log.d(TAG_DB, "enter updateByState()");
 		ContentValues values = new ContentValues();
 		values.put("state", state);
 		values.put("exec_time", System.currentTimeMillis());
 		if (db.update(DB_TABLE, values, "id=" + entity.getId(), null) < 1){
 			return false;
 		}
+		Log.d(TAG_DB, "exec updateByState() successfully");
 		return true;
 	}
 
@@ -116,6 +119,37 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	        ArrayList<ReminderOnDemandEntity> ret = new ArrayList<ReminderOnDemandEntity>();
 	        try {
 	            c = this.db.query(DB_TABLE, COLS, "state=0", null, null, null, null);
+	            if (c != null){
+	            	int numRows = c.getCount();
+		            c.moveToFirst();
+		            for (int i = 0; i < numRows; ++i) {
+		            	long id = c.getLong(0);
+		            	String name = c.getString(1);
+		            	String record_loc = c.getString(2);
+		            	long createTime = c.getLong(3);
+		            	int interval = c.getInt(5);
+		            	int frequency = c.getInt(6);
+		            	int state = c.getInt(7);
+		            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, record_loc, createTime, interval, frequency, state);
+		            	ret.add(entity);
+		            }
+	            }
+	        } catch (SQLException e) {
+	            Log.v(CLASSNAME, CLASSNAME, e);
+	        } finally {
+	            if (c != null && !c.isClosed()) {
+	                c.close();
+	            }
+	        }
+	        return ret;
+	}
+	
+	@Override
+	public List<ReminderOnDemandEntity> getAllCancelledReminders() {
+		 Cursor c = null;
+	        ArrayList<ReminderOnDemandEntity> ret = new ArrayList<ReminderOnDemandEntity>();
+	        try {
+	            c = this.db.query(DB_TABLE, COLS, "state=3", null, null, null, null);
 	            if (c != null){
 	            	int numRows = c.getCount();
 		            c.moveToFirst();

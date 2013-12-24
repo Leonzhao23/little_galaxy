@@ -1,5 +1,7 @@
 package com.little.galaxy.activities;
 
+import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_ACTIVITY;
+
 import java.util.List;
 
 import android.annotation.TargetApi;
@@ -9,8 +11,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -73,6 +73,7 @@ public class ReminderOnDemandSettingsActivity extends PreferenceActivity {
 		ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, id, interval*60*1000, 1/*frequency=1*/, 0/*state new*/);
 		dbService.insert(entity);
 		Intent intent = new Intent(ReminderOnDemandSettingsActivity.this, ReminderOnDemandService.class);
+		Log.d(TAG_ACTIVITY, "try to start service!");
 		ReminderOnDemandSettingsActivity.this.startService(intent);
 	}
 

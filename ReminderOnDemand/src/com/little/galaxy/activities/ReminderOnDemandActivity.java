@@ -27,12 +27,11 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 import com.little.galaxy.R;
 import com.little.galaxy.RecordOnDemand;
-import com.little.galaxy.adaptors.ReminderOnDemandListViewAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandPagerAdaptor;
+import com.little.galaxy.adaptors.ReminderOnDemandViewAdaptor;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.services.IPlayService;
 import com.little.galaxy.storages.DBServiceFactory;
@@ -50,6 +49,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
     private Button startReminderBtn = null;
     private ListView reminderStartListView = null;
     private ListView reminderDoneListView = null;
+    private ListView reminderCancelListView = null;
 	private IDBService dbService = null;
 	private IPlayService playService = null;
 	private RecordOnDemand recordOnDemand = null;
@@ -69,11 +69,24 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 //		        // assign adapter to list view
 //				reminderStartListView.setAdapter(adapter);
 //			}
-			 List<ReminderOnDemandEntity> startEntities = dbService.getAllStartReminders();
-	         ReminderOnDemandListViewAdaptor startAdaptor = new ReminderOnDemandListViewAdaptor(ReminderOnDemandActivity.this, startEntities);
-		     // assign adapter to list view
-			 reminderStartListView.setAdapter(startAdaptor);
-			 pagerAdaptor.notifyDataSetChanged();
+			List<ReminderOnDemandEntity> entities = null;
+			ReminderOnDemandViewAdaptor adaptor = null;
+			switch(msg.what){
+			case 0:
+				 entities = dbService.getAllStartReminders();
+				 adaptor = new ReminderOnDemandViewAdaptor(ReminderOnDemandActivity.this, entities, ReminderOnDemandEntity.ReminderState.Start);
+			     // assign adapter to list view
+				 reminderStartListView.setAdapter(adaptor);
+				 break;
+			case 1:
+				 entities = dbService.getAllStartReminders();
+		         adaptor = new ReminderOnDemandViewAdaptor(ReminderOnDemandActivity.this, entities, ReminderOnDemandEntity.ReminderState.Cancel);
+			     // assign adapter to list view
+		         reminderCancelListView.setAdapter(adaptor);
+				 break;
+			}
+			pagerAdaptor.notifyDataSetChanged();
+			
         }
 		
 	};
@@ -83,7 +96,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
         public void handleMessage(final Message msg) {
 			List<ReminderOnDemandEntity> ReminderOnDemandEntities = dbService.getAllDoneReminders();
 			// setup data adapter
-			ReminderOnDemandListViewAdaptor adaptor = new ReminderOnDemandListViewAdaptor(ReminderOnDemandActivity.this, ReminderOnDemandEntities);
+			ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandViewAdaptor(ReminderOnDemandActivity.this, ReminderOnDemandEntities, ReminderOnDemandEntity.ReminderState.Done);
 	        // assign adapter to list view
 			reminderDoneListView.setAdapter(adaptor);
 			pagerAdaptor.notifyDataSetChanged();
@@ -108,6 +121,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 		}
 		
 	};
+	
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -227,6 +241,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
     	 titles = new ArrayList<String>();
     	 titles.add(getResources().getString(R.string.reminder_start_text));
          titles.add(getResources().getString(R.string.reminder_done_text));
+         titles.add(getResources().getString(R.string.reminder_cancel_text));
          pagesArrayList = new ArrayList<View>();
     
          LayoutInflater layoutInflater=getLayoutInflater();
@@ -237,14 +252,18 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
          
          reminderDoneListView = (ListView) 
          		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
+         
+         reminderCancelListView = (ListView) 
+         		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
        
 		 pagesArrayList.add(reminderStartListView);	
 		 pagesArrayList.add(reminderDoneListView);
+		 pagesArrayList.add(reminderCancelListView);
 		 
          pagerAdaptor = new ReminderOnDemandPagerAdaptor(pagesArrayList, titles);
          viewPager.setAdapter(pagerAdaptor);
          viewPager.setOnPageChangeListener(new ReminderOnDemaindPageChangeListener());
-         viewPager.setCurrentItem(0);
+         viewPager.setCurrentItem(1);
          
          timer = new Timer();
          timer.schedule(refreshStartViewTask, 0, 1*60*1000);
@@ -283,12 +302,13 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
             switch(position)
             {
             case 0: 
-            	startViewHandler.sendEmptyMessage(0);
+            	startViewHandler.sendEmptyMessage(1);
             	break;
             case 1:
-            	doneViewHandler.sendEmptyMessage(0);
+            	startViewHandler.sendEmptyMessage(0);
             	break;
-            
+            case 2:
+            	doneViewHandler.sendEmptyMessage(0);
             }
         }
     }

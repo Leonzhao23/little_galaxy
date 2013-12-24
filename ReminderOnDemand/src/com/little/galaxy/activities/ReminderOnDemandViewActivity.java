@@ -14,7 +14,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.little.galaxy.R;
-import com.little.galaxy.adaptors.ReminderOnDemandListViewAdaptor;
+import com.little.galaxy.adaptors.ReminderOnDemandViewAdaptor;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.storages.DBServiceFactory;
 import com.little.galaxy.storages.DBType;
@@ -24,7 +24,7 @@ import com.little.galaxy.storages.IDBService;
 public class ReminderOnDemandViewActivity extends ListActivity {
 	private IDBService dbService = null;
 	private ProgressDialog progressDialog = null;
-	private ReminderOnDemandListViewAdaptor reminderOnDemandView = null;
+	private ReminderOnDemandViewAdaptor reminderOnDemandView = null;
 	private List<ReminderOnDemandEntity> reminderOnDemandEntities = null;
 	
 	private String type;
@@ -34,7 +34,7 @@ public class ReminderOnDemandViewActivity extends ListActivity {
         public void handleMessage(final Message msg) {
             Log.d(this.getClass().getSimpleName(), " worker thread done, setup ReviewAdapter");
             progressDialog.dismiss();
-            reminderOnDemandView = new ReminderOnDemandListViewAdaptor(ReminderOnDemandViewActivity.this, reminderOnDemandEntities);
+            reminderOnDemandView = new ReminderOnDemandViewAdaptor(ReminderOnDemandViewActivity.this, reminderOnDemandEntities, ReminderOnDemandEntity.ReminderState.Done);
             setListAdapter(reminderOnDemandView);
             
         }

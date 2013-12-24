@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: /Volumes/work/git/repos/little_galaxy/ReminderOnDemand/src/com/little/galaxy/services/IPlayService.aidl
+ * Original file: C:\\Users\\IBM_ADMIN\\Documents\\GitHub\\little_galaxy\\ReminderOnDemand\\src\\com\\little\\galaxy\\services\\IPlayService.aidl
  */
 package com.little.galaxy.services;
 public interface IPlayService extends android.os.IInterface
@@ -52,7 +52,9 @@ return true;
 case TRANSACTION_stop:
 {
 data.enforceInterface(DESCRIPTOR);
-this.stop();
+java.lang.String _arg0;
+_arg0 = data.readString();
+this.stop(_arg0);
 reply.writeNoException();
 return true;
 }
@@ -88,12 +90,13 @@ _reply.recycle();
 _data.recycle();
 }
 }
-@Override public void stop() throws android.os.RemoteException
+@Override public void stop(java.lang.String scheduleId) throws android.os.RemoteException
 {
 android.os.Parcel _data = android.os.Parcel.obtain();
 android.os.Parcel _reply = android.os.Parcel.obtain();
 try {
 _data.writeInterfaceToken(DESCRIPTOR);
+_data.writeString(scheduleId);
 mRemote.transact(Stub.TRANSACTION_stop, _data, _reply, 0);
 _reply.readException();
 }
@@ -107,5 +110,5 @@ static final int TRANSACTION_play = (android.os.IBinder.FIRST_CALL_TRANSACTION +
 static final int TRANSACTION_stop = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
 }
 public void play() throws android.os.RemoteException;
-public void stop() throws android.os.RemoteException;
+public void stop(java.lang.String scheduleId) throws android.os.RemoteException;
 }
