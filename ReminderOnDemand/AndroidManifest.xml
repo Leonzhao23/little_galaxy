@@ -33,6 +33,9 @@
             android:name="com.little.galaxy.services.ReminderOnDemandService"
             android:exported="true"
             android:process=":remote" >
+             <intent-filter>
+                <action android:name="com.little.galaxy.services.IPlayService" />
+            </intent-filter>
         </service>
 
         <activity

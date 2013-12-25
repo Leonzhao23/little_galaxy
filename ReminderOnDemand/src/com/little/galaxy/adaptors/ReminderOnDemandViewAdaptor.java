@@ -1,38 +1,38 @@
 package com.little.galaxy.adaptors;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.little.galaxy.R;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.entities.ReminderOnDemandEntity.ReminderState;
+import com.little.galaxy.layouts.ReminderOnDemandCancelViewLayout;
 import com.little.galaxy.layouts.ReminderOnDemandDoneViewLayout;
 import com.little.galaxy.layouts.ReminderOnDemandStartViewLayout;
-import com.little.galaxy.storages.DBServiceFactory;
-import com.little.galaxy.storages.DBType;
-import com.little.galaxy.storages.IDBService;
+import com.little.galaxy.local.services.ReminderOnDemandServiceConnection;
+import com.little.galaxy.services.IPlayService;
 
 public class ReminderOnDemandViewAdaptor extends BaseAdapter {
 	
 	private final Context context;
 	private final List<ReminderOnDemandEntity> reminderOnDemandEntities;
 	private final ReminderState state;
+	private ReminderOnDemandServiceConnection conn;
 	
 	public ReminderOnDemandViewAdaptor(Context context, List<ReminderOnDemandEntity> reminderOnDemandEntities, ReminderState state){
 		this.context = context;
 		this.reminderOnDemandEntities = reminderOnDemandEntities;
 		this.state = state;
+	}
+	
+	public ReminderOnDemandViewAdaptor(Context context, List<ReminderOnDemandEntity> reminderOnDemandEntities, ReminderState state, ReminderOnDemandServiceConnection conn){
+		this.context = context;
+		this.reminderOnDemandEntities = reminderOnDemandEntities;
+		this.state = state;
+		this.conn = conn;
 	}
 
 	@Override
@@ -56,11 +56,15 @@ public class ReminderOnDemandViewAdaptor extends BaseAdapter {
 		
 		switch (state){
 		case Start:	
-			viewGroup = new ReminderOnDemandStartViewLayout(this.context, entity);
+			viewGroup = new ReminderOnDemandStartViewLayout(this.context, entity, conn);
 			break;
-		case New:
+		case Cancel:
+			viewGroup = new ReminderOnDemandCancelViewLayout(this.context, entity);
+			break;
 		case Done:
 			viewGroup = new ReminderOnDemandDoneViewLayout(this.context, entity);
+			break;
+		default:
 			break;
 		}
 		return viewGroup;

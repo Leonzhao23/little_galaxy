@@ -40,9 +40,10 @@ public final class R {
     }
     public static final class id {
         public static final int button1=0x7f0b0001;
-        public static final int desc=0x7f0b0004;
-        public static final int listView=0x7f0b0002;
-        public static final int subject=0x7f0b0003;
+        public static final int desc=0x7f0b0005;
+        public static final int intro=0x7f0b0002;
+        public static final int listView=0x7f0b0003;
+        public static final int subject=0x7f0b0004;
         public static final int viewPager=0x7f0b0000;
     }
     public static final class layout {
@@ -57,19 +58,20 @@ public final class R {
     public static final class string {
         public static final int action_settings=0x7f080001;
         public static final int app_name=0x7f080000;
-        public static final int button_name=0x7f080002;
+        public static final int button_name=0x7f08000f;
         public static final int button_stop=0x7f080003;
-        public static final int button_view=0x7f08000f;
-        public static final int pref_default_name=0x7f080016;
-        public static final int pref_head_frequency=0x7f080014;
-        public static final int pref_head_interval=0x7f080013;
+        public static final int button_view=0x7f080010;
+        public static final int intro=0x7f080002;
+        public static final int pref_default_name=0x7f080017;
+        public static final int pref_head_frequency=0x7f080015;
+        public static final int pref_head_interval=0x7f080014;
         /**  General settings 
          */
-        public static final int pref_header_general=0x7f080012;
-        public static final int pref_name=0x7f080015;
+        public static final int pref_header_general=0x7f080013;
+        public static final int pref_name=0x7f080016;
         public static final int reminder=0x7f08000e;
         public static final int reminder_cancel_text=0x7f08000a;
-        public static final int reminder_done=0x7f080010;
+        public static final int reminder_done=0x7f080011;
         public static final int reminder_done_more=0x7f080004;
         public static final int reminder_done_text=0x7f080009;
         public static final int reminder_exec_time=0x7f08000b;
@@ -78,7 +80,7 @@ public final class R {
         public static final int reminder_start_view_desc=0x7f08000d;
         public static final int reminder_start_view_subject=0x7f08000c;
         public static final int reminder_view=0x7f080007;
-        public static final int title_activity_reminder_on_demand_settings=0x7f080011;
+        public static final int title_activity_reminder_on_demand_settings=0x7f080012;
         public static final int title_activity_reminder_on_demand_view=0x7f080006;
     }
     public static final class style {

@@ -33,7 +33,7 @@ public class ReminderOnDemandStartViewLayout extends LinearLayout {
     private ImageButton btn;
     private static final String TAG = "EXEC";
 
-    public ReminderOnDemandStartViewLayout(final Context context, final ReminderOnDemandEntity entity) {
+    public ReminderOnDemandStartViewLayout(final Context context, final ReminderOnDemandEntity entity, final ReminderOnDemandServiceConnection conn) {
 
         super(context);
        
@@ -47,7 +47,7 @@ public class ReminderOnDemandStartViewLayout extends LinearLayout {
       	int slot = interval - subtract;
       	int minutes = slot/(60*1000);
       	minutes = minutes < 0 ? 0 : minutes;
-      	Log.d(TAG, "reminging: " + minutes + "Minute");
+      	Log.d(TAG, "reminging: " + minutes + " Minutes");
     
         btn = new ImageButton(context);
         btn.setImageDrawable((getResources().getDrawable(R.drawable.stop)));
@@ -55,8 +55,6 @@ public class ReminderOnDemandStartViewLayout extends LinearLayout {
 			@Override
 			public void onClick(View v) {
 				try {
-					ReminderOnDemandServiceConnection conn = new ReminderOnDemandServiceConnection();
-					context.bindService(new Intent(context,ReminderOnDemandService.class), conn, Context.BIND_AUTO_CREATE);
 					IPlayService playService = conn.getPlayService();
 					if (playService != null){
 						playService.stop(String.valueOf(entity.getId()));
@@ -98,7 +96,7 @@ public class ReminderOnDemandStartViewLayout extends LinearLayout {
         childLayout.addView(this.createTime, childParams);
         
         this.execTime = new TextView(context);
-        this.execTime.setText(context.getResources().getString(R.string.reminder_exec_time) + minutes + " minute");
+        this.execTime.setText(context.getResources().getString(R.string.reminder_exec_time) + minutes + " minutes");
         this.execTime.setTextSize(10f);
         this.execTime.setTextColor(Color.GRAY);
         childLayout.addView(this.execTime, childParams);

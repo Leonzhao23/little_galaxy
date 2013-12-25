@@ -31,7 +31,13 @@
            android:layout_height="wrap_content"
            android:layout_gravity="center_vertical|center_horizontal"
            android:src="@drawable/speak_down" />
-     
+
+       <TextView
+           android:id="@+id/intro"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_gravity="center_vertical|center_horizontal"
+           android:text="@string/intro" />
 
     </LinearLayout>
     

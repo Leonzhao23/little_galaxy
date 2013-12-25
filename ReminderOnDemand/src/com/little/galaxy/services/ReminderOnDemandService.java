@@ -53,7 +53,6 @@ public class ReminderOnDemandService extends Service {
 		public void run() {
 			sendNotification(R.drawable.ic_launcher, entity.getName(), entity.getRecoredLoc());
 			mp = MediaPlayer.create(ReminderOnDemandService.this, recordLoc);	
-			reminderOnDemandBind = new ReminderOnDemandBind();
 			try {
 				reminderOnDemandBind.play();
 			} catch (RemoteException re) {
@@ -69,6 +68,7 @@ public class ReminderOnDemandService extends Service {
 		//android.os.Debug.waitForDebugger();
 		super.onCreate();
 		Log.d(TAG_SERVICE, "Service created!");
+		reminderOnDemandBind = new ReminderOnDemandBind();
 		ses = Executors.newSingleThreadScheduledExecutor(); 
 		scheduleMap = new ConcurrentHashMap<String, ScheduledFuture<?>>();
 		nm = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
@@ -83,7 +83,7 @@ public class ReminderOnDemandService extends Service {
 		//	ReminderOnDemandTimerTask timerTask = new ReminderOnDemandTimerTask(reminderOnDemandEntity);
 		//	timer.schedule(timerTask, interval < 0 ? 0:interval);
 			ReminderOnDemandCommand command = new ReminderOnDemandCommand(reminderOnDemandEntity);
-			ScheduledFuture<?> sf = ses.scheduleWithFixedDelay(command, interval, 0, TimeUnit.MILLISECONDS);
+			ScheduledFuture<?> sf = ses.schedule(command, interval, TimeUnit.MILLISECONDS);
 			scheduleMap.put(String.valueOf(reminderOnDemandEntity.getId()), sf);
 			Log.d(TAG_SERVICE, "Task [" + reminderOnDemandEntity.getName() + "] rescheduled. Interval=" + interval);
 		}
@@ -99,7 +99,7 @@ public class ReminderOnDemandService extends Service {
 			//ReminderOnDemandTimerTask timerTask = new ReminderOnDemandTimerTask(reminderOnDemandEntity);
 			//timer.schedule(timerTask, interval);
 			ReminderOnDemandCommand command = new ReminderOnDemandCommand(reminderOnDemandEntity);
-			ScheduledFuture<?>  sf= ses.scheduleWithFixedDelay(command, interval, 0, TimeUnit.MILLISECONDS);
+			ScheduledFuture<?>  sf = ses.schedule(command, interval, TimeUnit.MILLISECONDS);
 			scheduleMap.put(String.valueOf(reminderOnDemandEntity.getId()), sf);
 			Log.d(TAG_SERVICE, "Task [" + reminderOnDemandEntity.getName() + "] scheduled. Interval=" + interval);
 			dbService.updateByState(reminderOnDemandEntity, ReminderOnDemandEntity.ReminderState.Start.getState());
@@ -127,12 +127,14 @@ public class ReminderOnDemandService extends Service {
 		@Override
 		public void stop(String id) throws RemoteException {
 			Log.d(TAG_SERVICE, "Enter Media Play stop()");
-			if (mp == null){
-				ScheduledFuture<?>  sf = scheduleMap.get(id);
+			if (mp != null){
+				mp.stop();
+				Log.d(TAG_SERVICE, "Play stopped!");
+			}
+			ScheduledFuture<?>  sf = scheduleMap.get(id);
+			if (sf != null){
 				sf.cancel(true);
 				Log.d(TAG_SERVICE, "Task cancelled");
-			} else{
-				mp.stop();
 			}
 			
 		}
