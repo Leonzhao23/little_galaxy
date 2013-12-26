@@ -11,9 +11,9 @@ import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.entities.ReminderOnDemandEntity.ReminderState;
 import com.little.galaxy.layouts.ReminderOnDemandCancelViewLayout;
 import com.little.galaxy.layouts.ReminderOnDemandDoneViewLayout;
+import com.little.galaxy.layouts.ReminderOnDemandNewViewLayout;
 import com.little.galaxy.layouts.ReminderOnDemandStartViewLayout;
 import com.little.galaxy.local.services.ReminderOnDemandServiceConnection;
-import com.little.galaxy.services.IPlayService;
 
 public class ReminderOnDemandViewAdaptor extends BaseAdapter {
 	
@@ -21,6 +21,7 @@ public class ReminderOnDemandViewAdaptor extends BaseAdapter {
 	private final List<ReminderOnDemandEntity> reminderOnDemandEntities;
 	private final ReminderState state;
 	private ReminderOnDemandServiceConnection conn;
+	private int autoRunTime;
 	
 	public ReminderOnDemandViewAdaptor(Context context, List<ReminderOnDemandEntity> reminderOnDemandEntities, ReminderState state){
 		this.context = context;
@@ -33,6 +34,13 @@ public class ReminderOnDemandViewAdaptor extends BaseAdapter {
 		this.reminderOnDemandEntities = reminderOnDemandEntities;
 		this.state = state;
 		this.conn = conn;
+	}
+	
+	public ReminderOnDemandViewAdaptor(Context context, List<ReminderOnDemandEntity> reminderOnDemandEntities, ReminderState state, int autoRunTime){
+		this.context = context;
+		this.reminderOnDemandEntities = reminderOnDemandEntities;
+		this.state = state;
+		this.autoRunTime = autoRunTime;
 	}
 
 	@Override
@@ -55,6 +63,9 @@ public class ReminderOnDemandViewAdaptor extends BaseAdapter {
 		ReminderOnDemandEntity entity = reminderOnDemandEntities.get(position);
 		
 		switch (state){
+		case New:
+			viewGroup = new ReminderOnDemandNewViewLayout(this.context, entity, autoRunTime);
+			break;
 		case Start:	
 			viewGroup = new ReminderOnDemandStartViewLayout(this.context, entity, conn);
 			break;

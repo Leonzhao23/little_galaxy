@@ -4,6 +4,7 @@ public class ReminderOnDemandEntity {
 	
 	private long id;
 	private String name;
+	private String desc;
 	private String recoredLoc;
 	private long createTime;
 	private long execTime;
@@ -12,11 +13,12 @@ public class ReminderOnDemandEntity {
 	private ReminderState state;
 	
 	
-	public ReminderOnDemandEntity(long id, String name, String recoredLoc,
+	public ReminderOnDemandEntity(long id, String name, String desc, String recoredLoc,
 			long createTime, long execTime, int interval, int frenquecy, ReminderState state) {
 		super();
 		this.id = id;
 		this.name = name;
+		this.desc = desc;
 		this.recoredLoc = recoredLoc;
 		this.createTime = createTime;
 		this.execTime = execTime;
@@ -25,11 +27,12 @@ public class ReminderOnDemandEntity {
 		this.state = state;
 	}
 	
-	public ReminderOnDemandEntity(long id, String name, String recoredLoc,
+	public ReminderOnDemandEntity(long id, String name, String desc, String recoredLoc,
 			long createTime, int interval, int frenquecy, ReminderState state) {
 		super();
 		this.id = id;
 		this.name = name;
+		this.desc = desc;
 		this.recoredLoc = recoredLoc;
 		this.createTime = createTime;
 		this.interval = interval;
@@ -37,11 +40,12 @@ public class ReminderOnDemandEntity {
 		this.state = state;
 	}
 	
-	public ReminderOnDemandEntity(long id, String name, String recoredLoc,
+	public ReminderOnDemandEntity(long id, String name, String desc, String recoredLoc,
 			long createTime, int interval, int frenquecy, int state) {
 		super();
 		this.id = id;
 		this.name = name;
+		this.desc = desc;
 		this.recoredLoc = recoredLoc;
 		this.createTime = createTime;
 		this.interval = interval;
@@ -51,11 +55,12 @@ public class ReminderOnDemandEntity {
 	
 	
 	
-	public ReminderOnDemandEntity(long id, String name, String recoredLoc,
+	public ReminderOnDemandEntity(long id, String name, String desc, String recoredLoc,
 			long createTime, long execTime, int interval, int frenquecy, int state) {
 		super();
 		this.id = id;
 		this.name = name;
+		this.desc = desc;
 		this.recoredLoc = recoredLoc;
 		this.createTime = createTime;
 		this.execTime = execTime;
@@ -77,6 +82,15 @@ public class ReminderOnDemandEntity {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+
 	public String getRecoredLoc() {
 		return recoredLoc;
 	}

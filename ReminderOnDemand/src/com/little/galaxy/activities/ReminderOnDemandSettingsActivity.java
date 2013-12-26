@@ -62,19 +62,24 @@ public class ReminderOnDemandSettingsActivity extends PreferenceActivity {
 		String recordLoc = ReminderOnDemandSettingsActivity.this.getIntent().getStringExtra("recordLoc");
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ReminderOnDemandSettingsActivity.this);
 		String name = prefs.getString("name", "Default");
+		String desc = prefs.getString("desc", "This is your reminder");
 		String getStr = prefs.getString("interval", "");
+		String autoRunTime = prefs.getString("start", "Never");
 		int interval = 15*60*1000;
 		try{
 			interval = Integer.parseInt(getStr);
 		}catch(NumberFormatException nfe){
 			Log.w(this.getClass().getSimpleName(), "parse string to int error, use default value 15mins");
 		}
-		
-		ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, id, interval*60*1000, 1/*frequency=1*/, 0/*state new*/);
+		ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, id, interval*60*1000, 1/*frequency=1*/, 0/*state new*/);
 		dbService.insert(entity);
-		Intent intent = new Intent(ReminderOnDemandSettingsActivity.this, ReminderOnDemandService.class);
-		Log.d(TAG_ACTIVITY, "try to start service!");
-		ReminderOnDemandSettingsActivity.this.startService(intent);
+		if (Log.isLoggable(TAG_ACTIVITY, Log.DEBUG)){
+			Log.d(TAG_ACTIVITY, "New reminder[" + name +"] created");
+		}
+		Intent intent = new Intent(this, ReminderOnDemandActivity.class);
+		intent.putExtra("autoRunTime", autoRunTime);
+		this.setResult(RESULT_OK, new Intent(this, ReminderOnDemandActivity.class));
+		
 	}
 
 	@Override
@@ -98,27 +103,39 @@ public class ReminderOnDemandSettingsActivity extends PreferenceActivity {
 		// In the simplified UI, fragments are not used at all and we instead
 		// use the older PreferenceActivity APIs.
 
-		// Add 'general' preferences.
+		// Add 'Name' preferences.
 		addPreferencesFromResource(R.xml.pref_general);
+		
+		// Add 'Desc' preferences.
+		addPreferencesFromResource(R.xml.pref_desc);
 
-		// Add 'notifications' preferences, and a corresponding header.
+		// Add 'Interval' preferences, and a corresponding header.
 		PreferenceCategory fakeHeader = new PreferenceCategory(this);
 		fakeHeader.setTitle(R.string.pref_head_interval);
 		getPreferenceScreen().addPreference(fakeHeader);
 		addPreferencesFromResource(R.xml.pref_interval);
 
-		// Add 'data and sync' preferences, and a corresponding header.
+		// Add 'Frequency' preferences, and a corresponding header.
 		fakeHeader = new PreferenceCategory(this);
 		fakeHeader.setTitle(R.string.pref_head_frequency);
 		getPreferenceScreen().addPreference(fakeHeader);
 		addPreferencesFromResource(R.xml.pref_frequency);
+		
+		// Add 'Start' preferences, and a corresponding header.
+		fakeHeader = new PreferenceCategory(this);
+		fakeHeader.setTitle(R.string.pref_head_start);
+		getPreferenceScreen().addPreference(fakeHeader);
+		addPreferencesFromResource(R.xml.pref_start);
+				
 
 		// Bind the summaries of EditText/List/Dialog/Ringtone preferences to
 		// their values. When their values change, their summaries are updated
 		// to reflect the new value, per the Android Design guidelines.
 		bindPreferenceSummaryToValue(findPreference("name"));
+		bindPreferenceSummaryToValue(findPreference("desc"));
 		bindPreferenceSummaryToValue(findPreference("interval"));
 		bindPreferenceSummaryToValue(findPreference("frequency"));
+		bindPreferenceSummaryToValue(findPreference("start"));
 	}
 
 	/** {@inheritDoc} */
@@ -226,6 +243,21 @@ public class ReminderOnDemandSettingsActivity extends PreferenceActivity {
 			bindPreferenceSummaryToValue(findPreference("name"));
 		}
 	}
+	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	public static class DescPreferenceFragment extends PreferenceFragment {
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			addPreferencesFromResource(R.xml.pref_desc);
+
+			// Bind the summaries of EditText/List/Dialog/Ringtone preferences
+			// to their values. When their values change, their summaries are
+			// updated to reflect the new value, per the Android Design
+			// guidelines.
+			bindPreferenceSummaryToValue(findPreference("desc"));
+		}
+	}
 
 	/**
 	 * This fragment shows notification preferences only. It is used when the
@@ -266,17 +298,18 @@ public class ReminderOnDemandSettingsActivity extends PreferenceActivity {
 		}
 	}
 	
-//	private class StartServiceThread extends Thread{
-//		public void run(){
-//			 long id = System.currentTimeMillis();
-//			 String recordLoc = ReminderOnDemandSettingsActivity.this.getIntent().getStringExtra("recordLoc");
-//			 //String frequency = (String) findPreference("freqency").getTitle();
-//			 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ReminderOnDemandSettingsActivity.this);
-//			 int interval = prefs.getInt("interval", 15*60*1000);
-//			 String name = prefs.getString("name", "");
-//			 ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, id, interval*60*1000, 1/*frequency=1*/, 0/*state new*/);
-//			 dbService.insert(entity);
-//			 ReminderOnDemandSettingsActivity.this.startService(new Intent(ReminderOnDemandSettingsActivity.this, ReminderOnDemandService.class));
-//		}
-//	}
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	public static class StartPreferenceFragment extends PreferenceFragment {
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			addPreferencesFromResource(R.xml.pref_start);
+
+			// Bind the summaries of EditText/List/Dialog/Ringtone preferences
+			// to their values. When their values change, their summaries are
+			// updated to reflect the new value, per the Android Design
+			// guidelines.
+			bindPreferenceSummaryToValue(findPreference("start"));
+		}
+	}
 }

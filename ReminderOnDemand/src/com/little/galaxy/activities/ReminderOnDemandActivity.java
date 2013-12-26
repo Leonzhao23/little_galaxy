@@ -3,6 +3,7 @@ package com.little.galaxy.activities;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_HANDLER;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_PAGE;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_SPEECH;
+import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_ACTIVITY;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,12 +47,15 @@ import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
 
 public class ReminderOnDemandActivity extends Activity implements OnItemClickListener {
+	
+	private final static int RETURN_CODE_FROM_SETTINGS = 0;
 
     private ImageButton speakBtn = null;
     private ViewPager viewPager = null;
     private ArrayList<String> titles = null;
     private ArrayList<View> pagesArrayList;
     private ReminderOnDemandPagerAdaptor pagerAdaptor = null;
+    private ListView reminderNewListView = null;
     private ListView reminderStartListView = null;
     private ListView reminderDoneListView = null;
     private ListView reminderCancelListView = null;
@@ -62,6 +66,8 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 	private ReminderOnDemandServiceConnection conn = null;
 	private boolean bind = false;
 	private boolean canSpeechRecognized = false; 
+	private int autoRunTime;
+	
 	
 	private Handler viewHandler = new Handler(){
 		@Override
@@ -80,16 +86,15 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 			List<ReminderOnDemandEntity> entities = null;
 			ReminderOnDemandViewAdaptor adaptor = null;
 			switch(msg.what){
+			
 			case 0:
-				 entities = dbService.getAllCancelledReminders();
-				 adaptor = new ReminderOnDemandViewAdaptor(
-						 ReminderOnDemandActivity.this, 
-						 entities, 
-						 ReminderOnDemandEntity.ReminderState.Cancel);
-			     // assign adapter to list view
-				 reminderCancelListView.setAdapter(adaptor);
-				 Log.d(TAG_HANDLER, "Refresh Cancel View");
-				 break;
+				entities = dbService.getAllNewReminders();
+				adaptor = new ReminderOnDemandViewAdaptor(
+						ReminderOnDemandActivity.this, 
+						entities, 
+						ReminderOnDemandEntity.ReminderState.New, --autoRunTime);
+				reminderNewListView.setAdapter(adaptor);
+				Log.d(TAG_HANDLER, "Refresh New View");
 			case 1:
 				entities = dbService.getAllStartReminders();
 				adaptor = new ReminderOnDemandViewAdaptor(
@@ -100,6 +105,16 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 				Log.d(TAG_HANDLER, "Refresh Start View");
 				break;
 			case 2:
+				 entities = dbService.getAllCancelledReminders();
+				 adaptor = new ReminderOnDemandViewAdaptor(
+						 ReminderOnDemandActivity.this, 
+						 entities, 
+						 ReminderOnDemandEntity.ReminderState.Cancel);
+			     // assign adapter to list view
+				 reminderCancelListView.setAdapter(adaptor);
+				 Log.d(TAG_HANDLER, "Refresh Cancel View");
+				 break;
+			case 3:
 				entities = dbService.getAllDoneReminders();
 				adaptor = new ReminderOnDemandViewAdaptor(
 						ReminderOnDemandActivity.this, 
@@ -107,6 +122,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 						ReminderOnDemandEntity.ReminderState.Done);
 				reminderDoneListView.setAdapter(adaptor);
 				Log.d(TAG_HANDLER, "Refresh Done View");
+				
 			}
 			pagerAdaptor.notifyDataSetChanged();
 			
@@ -121,7 +137,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 		}
 	};
 	
-	private Runnable refreshCancelViewTask = new Runnable(){
+	private Runnable refreshNewViewTask = new Runnable(){
 
 		@Override
 		public void run() {
@@ -139,11 +155,20 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 		
 	};
 	
-	private Runnable refreshDoneViewTask = new Runnable(){
+	private Runnable refreshCancelViewTask = new Runnable(){
 
 		@Override
 		public void run() {
 			viewHandler.sendEmptyMessage(2);	
+		}
+		
+	};
+	
+	private Runnable refreshDoneViewTask = new Runnable(){
+
+		@Override
+		public void run() {
+			viewHandler.sendEmptyMessage(3);	
 		}
 		
 	};
@@ -208,7 +233,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 					String recordLoc = recordOnDemand.stopRecording();
 					Intent intent = new Intent(ReminderOnDemandActivity.this, ReminderOnDemandSettingsActivity.class);
 					intent.putExtra("recordLoc", recordLoc);
-					ReminderOnDemandActivity.this.startActivity(intent);
+					ReminderOnDemandActivity.this.startActivityForResult(intent, RETURN_CODE_FROM_SETTINGS);
 					break;
 				}
 				default:
@@ -266,6 +291,21 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
             	Log.d(TAG_SPEECH, str);
             }
         }
+        
+        if (requestCode == RETURN_CODE_FROM_SETTINGS && resultCode == RESULT_OK) {
+            String strExtra = data.getStringExtra("autoRunTime");
+            if (strExtra.equals("Never")){
+            	autoRunTime = -1;
+            } else {
+            	try{
+            		autoRunTime = Integer.parseInt(strExtra);
+            	}catch(NumberFormatException nfe){
+            		Log.w(TAG_ACTIVITY, nfe);
+            	}
+            	
+            }
+           
+        }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -289,13 +329,17 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
     
     private void initPagerViews(){   
     	 titles = new ArrayList<String>();
-    	 titles.add(getResources().getString(R.string.reminder_cancel_text));
-         titles.add(getResources().getString(R.string.reminder_start_text));
+    	 titles.add(getResources().getString(R.string.reminder_new_text));
+    	 titles.add(getResources().getString(R.string.reminder_start_text));
+         titles.add(getResources().getString(R.string.reminder_cancel_text));
          titles.add(getResources().getString(R.string.reminder_done_text));
          pagesArrayList = new ArrayList<View>();
     
          LayoutInflater layoutInflater=getLayoutInflater();
          viewPager = (ViewPager)findViewById(R.id.viewPager); 
+         
+         reminderNewListView = (ListView) 
+         		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
          
          reminderStartListView = (ListView) 
          		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
@@ -306,8 +350,9 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
          reminderCancelListView = (ListView) 
          		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
        
+         pagesArrayList.add(reminderNewListView);
+         pagesArrayList.add(reminderStartListView);
 		 pagesArrayList.add(reminderCancelListView);	
-		 pagesArrayList.add(reminderStartListView);
 		 pagesArrayList.add(reminderDoneListView);
 		 
          pagerAdaptor = new ReminderOnDemandPagerAdaptor(pagesArrayList, titles);
@@ -315,10 +360,8 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
          viewPager.setOnPageChangeListener(new ReminderOnDemaindPageChangeListener());
          viewPager.setCurrentItem(0);
          
-         ses = Executors.newScheduledThreadPool(3);
-         ses.scheduleWithFixedDelay(refreshCancelViewTask, 1*60, 1*60, TimeUnit.SECONDS);
-         ses.scheduleWithFixedDelay(refreshStartViewTask, 0, 1*60, TimeUnit.SECONDS);
-         ses.scheduleWithFixedDelay(refreshDoneViewTask, 1*60, 1*60, TimeUnit.SECONDS);
+         ses = Executors.newScheduledThreadPool(1);
+         ses.scheduleWithFixedDelay(refreshNewViewTask, 0, 1*60, TimeUnit.SECONDS);
          Log.d(getClass().getSimpleName(), "onCreate() invoked, timer.schedule invoked");
         
     }
@@ -346,6 +389,9 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
             	break;
             case 2:
             	viewHandler.sendEmptyMessage(2);
+            	break;
+            case 3:
+            	viewHandler.sendEmptyMessage(3);
             }
         }
     }

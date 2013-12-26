@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.RemoteException;
 import android.util.Log;
@@ -20,7 +19,6 @@ import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.entities.ReminderOnDemandEntity.ReminderState;
 import com.little.galaxy.local.services.ReminderOnDemandServiceConnection;
 import com.little.galaxy.services.IPlayService;
-import com.little.galaxy.services.ReminderOnDemandService;
 import com.little.galaxy.storages.DBServiceFactory;
 import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;

@@ -5,11 +5,17 @@
     <header
         android:fragment="com.little.galaxy.ReminderOnDemandSettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
+     <header
+        android:fragment="com.little.galaxy.ReminderOnDemandSettingsActivity$DescPreferenceFragment"
+        android:title="@string/pref_header_desc" />
     <header
-        android:fragment="com.little.galaxy.ReminderOnDemandSettingsActivity$NotificationPreferenceFragment"
+        android:fragment="com.little.galaxy.ReminderOnDemandSettingsActivity$IntervalPreferenceFragment"
         android:title="@string/pref_head_interval" />
     <header
-        android:fragment="com.little.galaxy.ReminderOnDemandSettingsActivity$DataSyncPreferenceFragment"
+        android:fragment="com.little.galaxy.ReminderOnDemandSettingsActivity$FrequencyPreferenceFragment"
         android:title="@string/pref_head_frequency" />
+     <header
+        android:fragment="com.little.galaxy.ReminderOnDemandSettingsActivity$StartPreferenceFragment"
+        android:title="@string/pref_head_start" />
 
 </preference-headers>

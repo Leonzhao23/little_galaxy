@@ -5,7 +5,6 @@ import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_SERVICE;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

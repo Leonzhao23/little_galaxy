@@ -22,10 +22,10 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	public static final int DB_VERSION = 3;
 
 	private static final String CLASSNAME = SQLiteDBService.class.getSimpleName();
-	private static final String[] COLS = new String[] { "id", "name", "record_loc", "create_time", "exec_time", "interval", "frequency", "state" };
+	private static final String[] COLS = new String[] { "id", "name", "desc", "record_loc", "create_time", "exec_time", "interval", "frequency", "state" };
 	private static final String DB_CREATE = "CREATE TABLE " 
             + DB_TABLE
-            + " (id INTEGER PRIMARY KEY, name TEXT, record_loc TEXT, create_time INTEGER, exec_time INTEGER, interval INTEGER, frequency INTEGER, state INTEGER);";
+            + " (id INTEGER PRIMARY KEY, name TEXT, desc TEXT, record_loc TEXT, create_time INTEGER, exec_time INTEGER, interval INTEGER, frequency INTEGER, state INTEGER);";
 	private SQLiteDatabase db;
 	
 	public SQLiteDBService(final Context context) {
@@ -67,6 +67,7 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 		 ContentValues values = new ContentValues();
 		 values.put("id", entity.getId());
 		 values.put("name", entity.getName());
+		 values.put("desc", entity.getDesc());
 		 values.put("record_loc", entity.getRecoredLoc());
 		 values.put("create_time", entity.getCreateTime());
 		 values.put("interval", entity.getInterval());
@@ -125,12 +126,13 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 		            for (int i = 0; i < numRows; ++i) {
 		            	long id = c.getLong(0);
 		            	String name = c.getString(1);
-		            	String record_loc = c.getString(2);
-		            	long createTime = c.getLong(3);
-		            	int interval = c.getInt(5);
-		            	int frequency = c.getInt(6);
-		            	int state = c.getInt(7);
-		            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, record_loc, createTime, interval, frequency, state);
+		            	String desc = c.getString(2);
+		            	String recordLoc = c.getString(3);
+		            	long createTime = c.getLong(4);
+		            	int interval = c.getInt(6);
+		            	int frequency = c.getInt(7);
+		            	int state = c.getInt(8);
+		            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, interval, frequency, state);
 		            	ret.add(entity);
 		            }
 	            }
@@ -156,13 +158,14 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	            for (int i = 0; i < numRows; ++i) {
 	            	long id = c.getLong(0);
 	            	String name = c.getString(1);
-	            	String recordLoc = c.getString(2);
-	            	long createTime = c.getLong(3);
-	            	long execTime = c.getLong(4);
-	            	int interval = c.getInt(5);
-	            	int frequency = c.getInt(6);
-	            	int state = c.getInt(7);
-	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, createTime, execTime, interval, frequency, state);
+	            	String desc = c.getString(2);
+	            	String recordLoc = c.getString(3);
+	            	long createTime = c.getLong(4);
+	            	long execTime = c.getLong(5);
+	            	int interval = c.getInt(6);
+	            	int frequency = c.getInt(7);
+	            	int state = c.getInt(8);
+	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, execTime, interval, frequency, state);
 	            	ret.add(entity);
 	            }
             }      
@@ -188,12 +191,13 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	 	            for (int i = 0; i < numRows; ++i) {
 	 	            	long id = c.getLong(0);
 	 	            	String name = c.getString(1);
-	 	            	String recordLoc = c.getString(2);
-	 	            	long createTime = c.getLong(3);
-	 	            	int interval = c.getInt(5);
-	 	            	int frequency = c.getInt(6);
-	 	            	int state = c.getInt(7);
-	 	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, createTime, interval, frequency, state);
+	 	            	String desc = c.getString(2);
+	 	            	String recordLoc = c.getString(3);
+	 	            	long createTime = c.getLong(4);
+	 	            	int interval = c.getInt(6);
+	 	            	int frequency = c.getInt(7);
+	 	            	int state = c.getInt(8);
+	 	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, interval, frequency, state);
 	 	            	ret.add(entity);
 	                }
 	            }
@@ -219,13 +223,14 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 		            for (int i = 0; i < numRows; ++i) {
 		            	long id = c.getLong(0);
 		            	String name = c.getString(1);
-		            	String recordLoc = c.getString(2);
-		            	long createTime = c.getLong(3);
-		            	long execTime = c.getLong(4);
-		            	int interval = c.getInt(5);
-		            	int frequency = c.getInt(6);
-		            	int state = c.getInt(7);
-		            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, createTime, execTime, interval, frequency, state);
+		            	String desc = c.getString(2);
+		            	String recordLoc = c.getString(3);
+		            	long createTime = c.getLong(4);
+		            	long execTime = c.getLong(5);
+		            	int interval = c.getInt(6);
+		            	int frequency = c.getInt(7);
+		            	int state = c.getInt(8);
+		            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, execTime, interval, frequency, state);
 		            	ret.add(entity);
 		            }
 	            }      
@@ -251,13 +256,14 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	            for (int i = 0; i < numRows; ++i) {
 	            	long id = c.getLong(0);
 	            	String name = c.getString(1);
-	            	String recordLoc = c.getString(2);
-	            	int createTime = c.getInt(3);
-	            	int execTime = c.getInt(4);
-	            	int interval = c.getInt(5);
-	            	int frequency = c.getInt(6);
-	            	int state = c.getInt(7);
-	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, recordLoc, createTime, execTime, interval, frequency, state);
+	            	String desc = c.getString(2);
+	            	String recordLoc = c.getString(3);
+	            	int createTime = c.getInt(4);
+	            	int execTime = c.getInt(5);
+	            	int interval = c.getInt(6);
+	            	int frequency = c.getInt(7);
+	            	int state = c.getInt(8);
+	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, execTime, interval, frequency, state);
 	            	ret.add(entity);
 	            }
 	        } catch (SQLException e) {
