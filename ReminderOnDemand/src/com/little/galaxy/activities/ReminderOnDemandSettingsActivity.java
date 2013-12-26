@@ -64,21 +64,20 @@ public class ReminderOnDemandSettingsActivity extends PreferenceActivity {
 		String name = prefs.getString("name", "Default");
 		String desc = prefs.getString("desc", "This is your reminder");
 		String getStr = prefs.getString("interval", "");
-		String autoRunTime = prefs.getString("start", "Never");
+		String getAutoStartTime = prefs.getString("start", "Never");
 		int interval = 15*60*1000;
+		int autoStartTime = -1;
 		try{
+			autoStartTime = Integer.parseInt(getAutoStartTime);
 			interval = Integer.parseInt(getStr);
 		}catch(NumberFormatException nfe){
 			Log.w(this.getClass().getSimpleName(), "parse string to int error, use default value 15mins");
 		}
-		ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, id, interval*60*1000, 1/*frequency=1*/, 0/*state new*/);
+		ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, id, interval*60*1000, 1/*frequency=1*/, autoStartTime, 0/*state new*/);
 		dbService.insert(entity);
 		if (Log.isLoggable(TAG_ACTIVITY, Log.DEBUG)){
 			Log.d(TAG_ACTIVITY, "New reminder[" + name +"] created");
 		}
-		Intent intent = new Intent(this, ReminderOnDemandActivity.class);
-		intent.putExtra("autoRunTime", autoRunTime);
-		this.setResult(RESULT_OK, new Intent(this, ReminderOnDemandActivity.class));
 		
 	}
 

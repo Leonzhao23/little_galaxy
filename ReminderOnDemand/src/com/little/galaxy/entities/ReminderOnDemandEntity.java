@@ -10,11 +10,12 @@ public class ReminderOnDemandEntity {
 	private long execTime;
 	private int interval;
 	private int frenquecy;
+	private int autoStartTime;
 	private ReminderState state;
 	
 	
 	public ReminderOnDemandEntity(long id, String name, String desc, String recoredLoc,
-			long createTime, long execTime, int interval, int frenquecy, ReminderState state) {
+			long createTime, long execTime, int interval, int frenquecy, int autoStartTime, ReminderState state) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -24,11 +25,12 @@ public class ReminderOnDemandEntity {
 		this.execTime = execTime;
 		this.interval = interval;
 		this.frenquecy = frenquecy;
+		this.autoStartTime = autoStartTime;
 		this.state = state;
 	}
 	
 	public ReminderOnDemandEntity(long id, String name, String desc, String recoredLoc,
-			long createTime, int interval, int frenquecy, ReminderState state) {
+			long createTime, int interval, int frenquecy, int autoStartTime, ReminderState state) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -37,11 +39,12 @@ public class ReminderOnDemandEntity {
 		this.createTime = createTime;
 		this.interval = interval;
 		this.frenquecy = frenquecy;
+		this.autoStartTime = autoStartTime;
 		this.state = state;
 	}
 	
 	public ReminderOnDemandEntity(long id, String name, String desc, String recoredLoc,
-			long createTime, int interval, int frenquecy, int state) {
+			long createTime, int interval, int frenquecy, int autoStartTime, int state) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -50,13 +53,14 @@ public class ReminderOnDemandEntity {
 		this.createTime = createTime;
 		this.interval = interval;
 		this.frenquecy = frenquecy;
+		this.autoStartTime = autoStartTime;
 		this.state = fromInt2ReminderState(state);
 	}
 	
 	
 	
 	public ReminderOnDemandEntity(long id, String name, String desc, String recoredLoc,
-			long createTime, long execTime, int interval, int frenquecy, int state) {
+			long createTime, long execTime, int interval, int frenquecy, int autoStartTime, int state) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -66,6 +70,7 @@ public class ReminderOnDemandEntity {
 		this.execTime = execTime;
 		this.interval = interval;
 		this.frenquecy = frenquecy;
+		this.autoStartTime = autoStartTime;
 		this.state = fromInt2ReminderState(state);
 	}
 	
@@ -123,6 +128,15 @@ public class ReminderOnDemandEntity {
 	}
 	public void setFrenquecy(int frenquecy) {
 		this.frenquecy = frenquecy;
+	}
+	
+
+	public int getAutoStartTime() {
+		return autoStartTime;
+	}
+
+	public void setAutoStartTime(int autoStartTime) {
+		this.autoStartTime = autoStartTime;
 	}
 
 	public ReminderState getState() {

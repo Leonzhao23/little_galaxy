@@ -60,13 +60,11 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
     private ListView reminderDoneListView = null;
     private ListView reminderCancelListView = null;
 	private IDBService dbService = null;
-	private IPlayService playService = null;
 	private RecordOnDemand recordOnDemand = null;
 	private ScheduledExecutorService ses = null;
 	private ReminderOnDemandServiceConnection conn = null;
 	private boolean bind = false;
 	private boolean canSpeechRecognized = false; 
-	private int autoRunTime;
 	
 	
 	private Handler viewHandler = new Handler(){
@@ -92,7 +90,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 				adaptor = new ReminderOnDemandViewAdaptor(
 						ReminderOnDemandActivity.this, 
 						entities, 
-						ReminderOnDemandEntity.ReminderState.New, --autoRunTime);
+						ReminderOnDemandEntity.ReminderState.New);
 				reminderNewListView.setAdapter(adaptor);
 				Log.d(TAG_HANDLER, "Refresh New View");
 			case 1:
@@ -233,7 +231,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 					String recordLoc = recordOnDemand.stopRecording();
 					Intent intent = new Intent(ReminderOnDemandActivity.this, ReminderOnDemandSettingsActivity.class);
 					intent.putExtra("recordLoc", recordLoc);
-					ReminderOnDemandActivity.this.startActivityForResult(intent, RETURN_CODE_FROM_SETTINGS);
+					ReminderOnDemandActivity.this.startActivity(intent);
 					break;
 				}
 				default:
@@ -291,22 +289,6 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
             	Log.d(TAG_SPEECH, str);
             }
         }
-        
-        if (requestCode == RETURN_CODE_FROM_SETTINGS && resultCode == RESULT_OK) {
-            String strExtra = data.getStringExtra("autoRunTime");
-            if (strExtra.equals("Never")){
-            	autoRunTime = -1;
-            } else {
-            	try{
-            		autoRunTime = Integer.parseInt(strExtra);
-            	}catch(NumberFormatException nfe){
-            		Log.w(TAG_ACTIVITY, nfe);
-            	}
-            	
-            }
-           
-        }
-
         super.onActivityResult(requestCode, resultCode, data);
     }
 	
@@ -361,7 +343,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
          viewPager.setCurrentItem(0);
          
          ses = Executors.newScheduledThreadPool(1);
-         ses.scheduleWithFixedDelay(refreshNewViewTask, 0, 1*60, TimeUnit.SECONDS);
+         ses.scheduleWithFixedDelay(refreshNewViewTask, 0, 1, TimeUnit.SECONDS);
          Log.d(getClass().getSimpleName(), "onCreate() invoked, timer.schedule invoked");
         
     }

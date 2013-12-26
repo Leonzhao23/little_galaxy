@@ -32,6 +32,8 @@ public interface IDBService {
 	
 	public void cleanup();
 
+	boolean updateStartTime(ReminderOnDemandEntity entity);
+
 	
 
 }

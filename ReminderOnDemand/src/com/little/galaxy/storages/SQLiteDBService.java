@@ -22,10 +22,10 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	public static final int DB_VERSION = 3;
 
 	private static final String CLASSNAME = SQLiteDBService.class.getSimpleName();
-	private static final String[] COLS = new String[] { "id", "name", "desc", "record_loc", "create_time", "exec_time", "interval", "frequency", "state" };
+	private static final String[] COLS = new String[] { "id", "name", "desc", "record_loc", "create_time", "exec_time", "interval", "frequency", "auto_start_time", "state" };
 	private static final String DB_CREATE = "CREATE TABLE " 
             + DB_TABLE
-            + " (id INTEGER PRIMARY KEY, name TEXT, desc TEXT, record_loc TEXT, create_time INTEGER, exec_time INTEGER, interval INTEGER, frequency INTEGER, state INTEGER);";
+            + " (id INTEGER PRIMARY KEY, name TEXT, desc TEXT, record_loc TEXT, create_time INTEGER, exec_time INTEGER, interval INTEGER, frequency INTEGER, auto_start_time INTEGER, state INTEGER);";
 	private SQLiteDatabase db;
 	
 	public SQLiteDBService(final Context context) {
@@ -72,6 +72,7 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 		 values.put("create_time", entity.getCreateTime());
 		 values.put("interval", entity.getInterval());
 		 values.put("frequency", entity.getFrenquecy());
+		 values.put("auto_start_time", entity.getAutoStartTime());
 		 values.put("state", entity.getState().getState());
 		 if (db.insert(DB_TABLE, null, values) < 1){
 			 return false;
@@ -94,11 +95,34 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 		Log.d(TAG_DB, "enter updateByState()");
 		ContentValues values = new ContentValues();
 		values.put("state", state);
-		values.put("exec_time", System.currentTimeMillis());
+		long now = System.currentTimeMillis();
+		switch(state){
+		case 0:
+		case 1:
+			values.put("create_time", now);
+			break;
+		case 2:
+		case 3:
+			values.put("exec_time", now);
+			break;
+		}
+		
 		if (db.update(DB_TABLE, values, "id=" + entity.getId(), null) < 1){
 			return false;
 		}
 		Log.d(TAG_DB, "exec updateByState() successfully");
+		return true;
+	}
+	
+	@Override
+	public boolean updateStartTime(final ReminderOnDemandEntity entity) {
+		Log.d(TAG_DB, "enter updateByState()");
+		ContentValues values = new ContentValues();
+		values.put("auto_start_time", entity.getAutoStartTime() - 1);
+		if (db.update(DB_TABLE, values, "id=" + entity.getId(), null) < 1){
+			return false;
+		}
+		Log.d(TAG_DB, "exec updateStartTime() successfully");
 		return true;
 	}
 
@@ -131,8 +155,9 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 		            	long createTime = c.getLong(4);
 		            	int interval = c.getInt(6);
 		            	int frequency = c.getInt(7);
-		            	int state = c.getInt(8);
-		            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, interval, frequency, state);
+		            	int autoStartTime = c.getInt(8);
+		            	int state = c.getInt(9);
+		            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, interval, frequency, autoStartTime, state);
 		            	ret.add(entity);
 		            }
 	            }
@@ -164,8 +189,9 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	            	long execTime = c.getLong(5);
 	            	int interval = c.getInt(6);
 	            	int frequency = c.getInt(7);
-	            	int state = c.getInt(8);
-	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, execTime, interval, frequency, state);
+	            	int autoStartTime = c.getInt(8);
+	            	int state = c.getInt(9);
+	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, execTime, interval, frequency, autoStartTime, state);
 	            	ret.add(entity);
 	            }
             }      
@@ -196,8 +222,9 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	 	            	long createTime = c.getLong(4);
 	 	            	int interval = c.getInt(6);
 	 	            	int frequency = c.getInt(7);
-	 	            	int state = c.getInt(8);
-	 	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, interval, frequency, state);
+	 	            	int autoStartTime = c.getInt(8);
+	 	            	int state = c.getInt(9);
+	 	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, interval, frequency, autoStartTime, state);
 	 	            	ret.add(entity);
 	                }
 	            }
@@ -229,8 +256,9 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 		            	long execTime = c.getLong(5);
 		            	int interval = c.getInt(6);
 		            	int frequency = c.getInt(7);
-		            	int state = c.getInt(8);
-		            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, execTime, interval, frequency, state);
+		            	int autoStartTime = c.getInt(8);
+		            	int state = c.getInt(9);
+		            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, execTime, interval, frequency, autoStartTime, state);
 		            	ret.add(entity);
 		            }
 	            }      
@@ -262,8 +290,9 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	            	int execTime = c.getInt(5);
 	            	int interval = c.getInt(6);
 	            	int frequency = c.getInt(7);
-	            	int state = c.getInt(8);
-	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, execTime, interval, frequency, state);
+	            	int autoStartTime = c.getInt(8);
+	            	int state = c.getInt(9);
+	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, execTime, interval, frequency, autoStartTime, state);
 	            	ret.add(entity);
 	            }
 	        } catch (SQLException e) {
