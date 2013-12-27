@@ -10,5 +10,7 @@ public interface ReminderOnDemandConsts {
 	static final String TAG_ACTIVITY = "ACTI";
 	static final String TAG_SERVICE = "SERV";
 	static final String TAG_DB = "DB";
+	static final String TAG_VIEW = "VIEW";
+	
 
 }

@@ -7,7 +7,7 @@
     <string name="pref_header_desc">Reminder Content</string>
     <string name="pref_head_interval">Interval</string>
     <string name="pref_head_frequency">Frequency</string>
-    <string name="pref_head_start">Reminder Starts Automatically After</string>
+    <string name="pref_head_start">Auto Start After</string>
     <string name="pref_name">Reminder</string>
     <string name="pref_default_name">reminder1</string>
     <string name="pref_desc">Description</string>
@@ -27,15 +27,13 @@
     <string-array name="pref_start_title">
         <item>0 second</item>
         <item>5 seconds</item>
-        <item>15 seconds</item>
-        <item>30 seconds</item>
+        <item>10 seconds</item>
         <item>Never</item>
     </string-array>
     <string-array name="pref_start_value">
         <item>0</item>
         <item>5</item>
-        <item>15</item>
-        <item>30</item>
+        <item>10</item>
         <item>Never</item>
     </string-array>
 

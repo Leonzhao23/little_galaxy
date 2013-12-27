@@ -16,5 +16,6 @@
     <string name="reminder_exec_time">The reminder will be executed after </string>
     <string name="reminder_start_view_subject">Subject</string>
     <string name="reminder_start_view_desc">Description</string>
+    <string name="start">button_start</string>
 
 </resources>

@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -23,8 +22,7 @@ import com.little.galaxy.storages.IDBService;
 
 public class ReminderOnDemandNewViewLayout extends LinearLayout{
 	private TextView subject;
-    private TextView Description;
-    private Button time;
+    private TextView desc;
     private ImageButton start;
     private ImageButton play;
     private ImageButton stop;
@@ -102,11 +100,11 @@ public class ReminderOnDemandNewViewLayout extends LinearLayout{
         this.subject.setTextColor(Color.BLACK);
         childLeftLayout.addView(this.subject, childLeftParams);
 
-        this.Description = new TextView(context);
-        this.Description.setText("This is a test ddddddddd");
-        this.Description.setTextSize(10f);
-        this.Description.setTextColor(Color.GRAY);
-        childLeftLayout.addView(this.Description, childLeftParams);
+        this.desc = new TextView(context);
+        this.desc.setText("This is a test ddddddddd");
+        this.desc.setTextSize(10f);
+        this.desc.setTextColor(Color.GRAY);
+        childLeftLayout.addView(this.desc, childLeftParams);
         
         LinearLayout childChildLayout = new LinearLayout(context);
         childChildLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -121,20 +119,16 @@ public class ReminderOnDemandNewViewLayout extends LinearLayout{
         LinearLayout childRightLayout = new LinearLayout(context);
         childRightLayout.setOrientation(LinearLayout.HORIZONTAL);
         LayoutParams childRightParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        childRightParams.gravity = Gravity.RIGHT;   
+        childRightParams.gravity = Gravity.RIGHT|Gravity.BOTTOM;   
         childRightParams.setMargins(0, 0, 0, 0);
         int autoStartTime = entity.getAutoStartTime();
         if (autoStartTime != -1){
-       	 	time = new Button(context);
-            time.setText(String.valueOf(autoStartTime) + "s");
-            time.setTextColor(Color.GREEN);
-            time.setGravity(Gravity.RIGHT|Gravity.BOTTOM);
-            time.setPadding(0, 0, 0, 0);
-            time.setBackgroundColor(Color.WHITE);
+        
             IDBService dbService = DBServiceFactory.getDBService(DBType.SQLite, context);
 			dbService.updateStartTime(entity);
 			dbService.cleanup();
-            childRightLayout.addView(this.time, childRightParams);
+		   
+			displayAutoStartTime(autoStartTime);
             if (autoStartTime < 1){
            	Intent intent = new Intent(context, ReminderOnDemandService.class);
 				Log.d(TAG_ACTIVITY, "Try to start service!");
@@ -147,6 +141,27 @@ public class ReminderOnDemandNewViewLayout extends LinearLayout{
         this.addView(childLeftLayout, parentParams);
         this.addView(childRightLayout, parentParams);
        
+    }
+    
+    private void displayAutoStartTime(final int autoStartTime){
+    	
+    	switch(autoStartTime){
+    	case 5:
+    		start.setImageDrawable((getResources().getDrawable(R.drawable.start5)));
+    		break;
+    	case 4:
+    		start.setImageDrawable((getResources().getDrawable(R.drawable.start4)));
+    		break;
+    	case 3:
+    		start.setImageDrawable((getResources().getDrawable(R.drawable.start3)));
+    		break;
+    	case 2:
+    		start.setImageDrawable((getResources().getDrawable(R.drawable.start2)));
+    		break;
+    	case 1:
+    		start.setImageDrawable((getResources().getDrawable(R.drawable.start1)));
+    		break;
+    	}
     }
 
 }

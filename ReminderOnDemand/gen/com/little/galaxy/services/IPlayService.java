@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: /Volumes/work/git/repos/little_galaxy/ReminderOnDemand/src/com/little/galaxy/services/IPlayService.aidl
+ * Original file: C:\\Users\\IBM_ADMIN\\Documents\\GitHub\\little_galaxy\\ReminderOnDemand\\src\\com\\little\\galaxy\\services\\IPlayService.aidl
  */
 package com.little.galaxy.services;
 public interface IPlayService extends android.os.IInterface

@@ -3,7 +3,6 @@ package com.little.galaxy.activities;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_HANDLER;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_PAGE;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_SPEECH;
-import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_ACTIVITY;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,15 +32,14 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.little.galaxy.R;
 import com.little.galaxy.RecordOnDemand;
+import com.little.galaxy.adaptors.ReminderOnDemandNewViewAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandPagerAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandViewAdaptor;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.local.services.ReminderOnDemandServiceConnection;
-import com.little.galaxy.services.IPlayService;
 import com.little.galaxy.storages.DBServiceFactory;
 import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
@@ -87,40 +85,47 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 			
 			case 0:
 				entities = dbService.getAllNewReminders();
-				adaptor = new ReminderOnDemandViewAdaptor(
-						ReminderOnDemandActivity.this, 
-						entities, 
-						ReminderOnDemandEntity.ReminderState.New);
+				adaptor = new ReminderOnDemandNewViewAdaptor(
+							reminderNewListView.getContext(), 
+							entities);
 				reminderNewListView.setAdapter(adaptor);
-				Log.d(TAG_HANDLER, "Refresh New View");
+				if (Log.isLoggable(TAG_HANDLER, Log.DEBUG)){
+					Log.d(TAG_HANDLER, "Refresh New View");
+				}
 			case 1:
-				entities = dbService.getAllStartReminders();
-				adaptor = new ReminderOnDemandViewAdaptor(
-						ReminderOnDemandActivity.this, 
-						entities, 
-						ReminderOnDemandEntity.ReminderState.Start, conn);
-				reminderStartListView.setAdapter(adaptor);
-				Log.d(TAG_HANDLER, "Refresh Start View");
+//				entities = dbService.getAllStartReminders();
+//				adaptor = new ReminderOnDemandViewAdaptor(
+//						reminderStartListView.getContext(), 
+//						entities, 
+//						ReminderOnDemandEntity.ReminderState.Start, conn);
+//				reminderStartListView.setAdapter(adaptor);
+				if (Log.isLoggable(TAG_HANDLER, Log.DEBUG)){
+					Log.d(TAG_HANDLER, "Refresh Start View");
+				}
 				break;
 			case 2:
-				 entities = dbService.getAllCancelledReminders();
-				 adaptor = new ReminderOnDemandViewAdaptor(
-						 ReminderOnDemandActivity.this, 
-						 entities, 
-						 ReminderOnDemandEntity.ReminderState.Cancel);
-			     // assign adapter to list view
-				 reminderCancelListView.setAdapter(adaptor);
-				 Log.d(TAG_HANDLER, "Refresh Cancel View");
+//				 entities = dbService.getAllCancelledReminders();
+//				 adaptor = new ReminderOnDemandViewAdaptor(
+//						 reminderCancelListView.getContext(), 
+//						 entities, 
+//						 ReminderOnDemandEntity.ReminderState.Cancel);
+//			     // assign adapter to list view
+//				 reminderCancelListView.setAdapter(adaptor);
+//				 if (Log.isLoggable(TAG_HANDLER, Log.DEBUG)){
+//					 Log.d(TAG_HANDLER, "Refresh Cancel View");
+//				 }
 				 break;
 			case 3:
-				entities = dbService.getAllDoneReminders();
-				adaptor = new ReminderOnDemandViewAdaptor(
-						ReminderOnDemandActivity.this, 
-						entities, 
-						ReminderOnDemandEntity.ReminderState.Done);
-				reminderDoneListView.setAdapter(adaptor);
-				Log.d(TAG_HANDLER, "Refresh Done View");
-				
+//				entities = dbService.getAllDoneReminders();
+//				adaptor = new ReminderOnDemandViewAdaptor(
+//						reminderDoneListView.getContext(), 
+//						entities, 
+//						ReminderOnDemandEntity.ReminderState.Done);
+//				reminderDoneListView.setAdapter(adaptor);
+				if (Log.isLoggable(TAG_HANDLER, Log.DEBUG)){
+					Log.d(TAG_HANDLER, "Refresh Done View");
+				}
+			
 			}
 			pagerAdaptor.notifyDataSetChanged();
 			
@@ -343,7 +348,7 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
          viewPager.setCurrentItem(0);
          
          ses = Executors.newScheduledThreadPool(1);
-         ses.scheduleWithFixedDelay(refreshNewViewTask, 0, 1, TimeUnit.SECONDS);
+         ses.scheduleWithFixedDelay(refreshNewViewTask, 0, 1*60, TimeUnit.SECONDS);
          Log.d(getClass().getSimpleName(), "onCreate() invoked, timer.schedule invoked");
         
     }

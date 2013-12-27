@@ -34,7 +34,7 @@ public class ReminderOnDemandViewActivity extends ListActivity {
         public void handleMessage(final Message msg) {
             Log.d(this.getClass().getSimpleName(), " worker thread done, setup ReviewAdapter");
             progressDialog.dismiss();
-            reminderOnDemandView = new ReminderOnDemandViewAdaptor(ReminderOnDemandViewActivity.this, reminderOnDemandEntities, ReminderOnDemandEntity.ReminderState.Done);
+            // reminderOnDemandView = new ReminderOnDemandViewAdaptor(ReminderOnDemandViewActivity.this, reminderOnDemandEntities, ReminderOnDemandEntity.ReminderState.Done);
             setListAdapter(reminderOnDemandView);
             
         }
