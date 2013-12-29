@@ -1,9 +1,14 @@
 package com.little.galaxy.adaptors;
 
+import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_ACTIVITY;
+import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_VIEW;
+
 import java.util.List;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.ColorMatrixColorFilter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,32 +16,24 @@ import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.little.galaxy.PlayOnDemand;
+import com.little.galaxy.R;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
-import com.little.galaxy.entities.ReminderOnDemandEntity.ReminderState;
-import com.little.galaxy.layouts.ReminderOnDemandCancelViewLayout;
-import com.little.galaxy.layouts.ReminderOnDemandDoneViewLayout;
-import com.little.galaxy.layouts.ReminderOnDemandNewViewLayout;
-import com.little.galaxy.layouts.ReminderOnDemandStartViewLayout;
-import com.little.galaxy.local.services.ReminderOnDemandServiceConnection;
-
-import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_VIEW;
+import com.little.galaxy.services.ReminderOnDemandService;
+import com.little.galaxy.storages.DBServiceFactory;
+import com.little.galaxy.storages.DBType;
+import com.little.galaxy.storages.IDBService;
 
 public abstract class ReminderOnDemandViewAdaptor extends BaseAdapter {
 	
 	protected final Context context;
 	protected final List<ReminderOnDemandEntity> reminderOnDemandEntities;
+	protected ViewHolder holder = null;
 	
 	public ReminderOnDemandViewAdaptor(Context context, List<ReminderOnDemandEntity> reminderOnDemandEntities){
 		this.context = context;
 		this.reminderOnDemandEntities = reminderOnDemandEntities;
 	}
-	
-//	public ReminderOnDemandViewAdaptor(Context context, List<ReminderOnDemandEntity> reminderOnDemandEntities, ReminderState state, ReminderOnDemandServiceConnection conn){
-//		this.context = context;
-//		this.reminderOnDemandEntities = reminderOnDemandEntities;
-//		this.state = state;
-//		this.conn = conn;
-//	}
 
 	@Override
 	public int getCount() {
@@ -53,41 +50,67 @@ public abstract class ReminderOnDemandViewAdaptor extends BaseAdapter {
 		return position;
 	}
 
-//	@Override
-//	public View getView(int position, View view, ViewGroup viewGroup) {
-//		ReminderOnDemandEntity entity = reminderOnDemandEntities.get(position);
-//		if (Log.isLoggable(TAG_VIEW, Log.DEBUG)){
-//			Log.d(TAG_VIEW, "View item position = " + position);
-//		}
-//		switch (state){
-//		case New:
-//			view = new ReminderOnDemandNewViewLayout().getView(context, viewGroup, entity);
-//			break;
-//		case Start:	
-//			view = new ReminderOnDemandNewViewLayout().getView(context, viewGroup, entity);
-//			//view = new ReminderOnDemandStartViewLayout(this.context, entity, conn);
-//			break;
-//		case Cancel:
-//			//view = new ReminderOnDemandCancelViewLayout(this.context, entity);
-//			view = new ReminderOnDemandNewViewLayout().getView(context, viewGroup, entity);
-//			break;
-//		case Done:
-//			//view = new ReminderOnDemandDoneViewLayout(this.context, entity);
-//			view = new ReminderOnDemandNewViewLayout().getView(context, viewGroup, entity);
-//			break;
-//		default:
-//			break;
-//		}
-//		return view;
-//	}
+	@Override
+	public View getView(int position, View view, ViewGroup viewGroup) {
+		final ReminderOnDemandEntity entity = reminderOnDemandEntities.get(position);
+		if (Log.isLoggable(TAG_VIEW, Log.DEBUG)){
+			Log.d(TAG_VIEW, "View item position = " + position);
+		}
+		if (view == null){
+	       view = initView();
+	       holder = new ViewHolder();
+		   holder.subject = (TextView)view.findViewById(R.id.subject);
+		   holder.desc = (TextView)view.findViewById(R.id.desc);
+		   holder.play = (ImageButton)view.findViewById(R.id.play);
+		   holder.stop = (ImageButton)view.findViewById(R.id.stop);
+		   view.setTag(holder);
+	        	
+	    } else{
+	       	holder = (ViewHolder)view.getTag();
+	    }
+		
+		holder.subject.setText(entity.getName());
+        holder.desc.setText(entity.getDesc());
+        
+        holder.play.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				PlayOnDemand play = new PlayOnDemand(context, entity.getRecoredLoc());
+				play.play();
+			}
+        });
+        
+        holder.stop.setOnClickListener(new View.OnClickListener() {
+        	@Override
+			public void onClick(View v) {
+				PlayOnDemand play = new PlayOnDemand(context, entity.getRecoredLoc());
+				play.stop();
+			}
+        });
+        
+        addHolders(view, entity);
+		
+		return view;
+	}
 	
-	 protected static class ViewHolder {
-	    	protected TextView subject;
-	        TextView desc;
-	        ImageButton start;
-	        ImageButton play;
-	        ImageButton stop;
-	        ImageButton del;
-	 }
+	protected abstract View initView();
+	
+	protected abstract void addHolders(View view, ReminderOnDemandEntity entity);
+	
+	protected static class ViewHolder {
+		
+		protected TextView subject;
+		protected TextView desc;
+		protected TextView startTime;
+		protected TextView execTime;
+
+		protected ImageButton play;
+		protected ImageButton stop;
+		protected ImageButton cancel;
+		protected ImageButton del;	
+		protected ImageButton edit;
+		protected ImageButton start;
+		protected ImageButton restart;
+	}
 
 }

@@ -2,12 +2,12 @@
 <resources>
 
     <string name="app_name">ReminderOnDemand</string>
-    <string name="action_settings">Settings</string>
+    <string name="settings">Settings</string>
     <string name="intro">Hold and Speak</string>
     <string name="button_stop">Stop</string>
     <string name="reminder_done_more">More ...</string>
     <string name="reminder_start_more">More ...</string>
-    <string name="title_activity_reminder_on_demand_view">ReminderOnDemandViewActivity</string>
+    <string name="title_activity_reminder_on_demand_view">ReminderOnDemandView</string>
     <string name="reminder_view">View All Reminders</string>
     <string name="reminder_new_text">New reminders</string>
     <string name="reminder_start_text">Started reminders</string>

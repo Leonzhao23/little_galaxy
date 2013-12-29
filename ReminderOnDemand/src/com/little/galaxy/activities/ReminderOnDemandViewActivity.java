@@ -60,7 +60,7 @@ public class ReminderOnDemandViewActivity extends ListActivity {
             @Override
             public void run() {
             	if (type.equals("start")){
-            		reminderOnDemandEntities = dbService.getAllStartReminders();
+            		reminderOnDemandEntities = dbService.getAllStartedReminders();
             	} else{
             		reminderOnDemandEntities = dbService.getAllDoneReminders();
             	}

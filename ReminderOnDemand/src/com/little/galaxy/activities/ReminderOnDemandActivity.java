@@ -1,10 +1,15 @@
 package com.little.galaxy.activities;
 
+import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_ACTIVITY;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_HANDLER;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_PAGE;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_SPEECH;
+import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_THREAD;
+import static com.little.galaxy.utils.ReminderOnDemandConsts.RETURN_CODE_FROM_SETTINGS;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,17 +20,21 @@ import java.util.concurrent.TimeUnit;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -35,8 +44,11 @@ import android.widget.ListView;
 
 import com.little.galaxy.R;
 import com.little.galaxy.RecordOnDemand;
+import com.little.galaxy.adaptors.ReminderOnDemandCancelViewAdaptor;
+import com.little.galaxy.adaptors.ReminderOnDemandDoneViewAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandNewViewAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandPagerAdaptor;
+import com.little.galaxy.adaptors.ReminderOnDemandStartViewAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandViewAdaptor;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.local.services.ReminderOnDemandServiceConnection;
@@ -44,10 +56,8 @@ import com.little.galaxy.storages.DBServiceFactory;
 import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
 
-public class ReminderOnDemandActivity extends Activity implements OnItemClickListener {
+public class ReminderOnDemandActivity extends Activity {
 	
-	private final static int RETURN_CODE_FROM_SETTINGS = 0;
-
     private ImageButton speakBtn = null;
     private ViewPager viewPager = null;
     private ArrayList<String> titles = null;
@@ -79,51 +89,32 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 //		        // assign adapter to list view
 //				reminderStartListView.setAdapter(adapter);
 //			}
-			List<ReminderOnDemandEntity> entities = null;
-			ReminderOnDemandViewAdaptor adaptor = null;
+			
 			switch(msg.what){
 			
 			case 0:
-				entities = dbService.getAllNewReminders();
-				adaptor = new ReminderOnDemandNewViewAdaptor(
-							reminderNewListView.getContext(), 
-							entities);
+				ReminderOnDemandViewAdaptor adaptor = (ReminderOnDemandViewAdaptor)msg.obj;
 				reminderNewListView.setAdapter(adaptor);
 				if (Log.isLoggable(TAG_HANDLER, Log.DEBUG)){
-					Log.d(TAG_HANDLER, "Refresh New View");
+					Log.d(TAG_HANDLER, "Refresh new view");
 				}
+				break;
 			case 1:
-//				entities = dbService.getAllStartReminders();
-//				adaptor = new ReminderOnDemandViewAdaptor(
-//						reminderStartListView.getContext(), 
-//						entities, 
-//						ReminderOnDemandEntity.ReminderState.Start, conn);
-//				reminderStartListView.setAdapter(adaptor);
+				reminderStartListView.setAdapter((ReminderOnDemandViewAdaptor)msg.obj);
 				if (Log.isLoggable(TAG_HANDLER, Log.DEBUG)){
-					Log.d(TAG_HANDLER, "Refresh Start View");
+					Log.d(TAG_HANDLER, "Refresh start view");
 				}
 				break;
 			case 2:
-//				 entities = dbService.getAllCancelledReminders();
-//				 adaptor = new ReminderOnDemandViewAdaptor(
-//						 reminderCancelListView.getContext(), 
-//						 entities, 
-//						 ReminderOnDemandEntity.ReminderState.Cancel);
-//			     // assign adapter to list view
-//				 reminderCancelListView.setAdapter(adaptor);
-//				 if (Log.isLoggable(TAG_HANDLER, Log.DEBUG)){
-//					 Log.d(TAG_HANDLER, "Refresh Cancel View");
-//				 }
+				reminderCancelListView.setAdapter((ReminderOnDemandViewAdaptor)msg.obj);
+				if (Log.isLoggable(TAG_HANDLER, Log.DEBUG)){
+					Log.d(TAG_HANDLER, "Refresh cancel view");
+				}
 				 break;
 			case 3:
-//				entities = dbService.getAllDoneReminders();
-//				adaptor = new ReminderOnDemandViewAdaptor(
-//						reminderDoneListView.getContext(), 
-//						entities, 
-//						ReminderOnDemandEntity.ReminderState.Done);
-//				reminderDoneListView.setAdapter(adaptor);
+				reminderDoneListView.setAdapter((ReminderOnDemandViewAdaptor)msg.obj);
 				if (Log.isLoggable(TAG_HANDLER, Log.DEBUG)){
-					Log.d(TAG_HANDLER, "Refresh Done View");
+					Log.d(TAG_HANDLER, "Refresh done view");
 				}
 			
 			}
@@ -144,7 +135,15 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 
 		@Override
 		public void run() {
-			viewHandler.sendEmptyMessage(0);	
+			List<ReminderOnDemandEntity> entities = dbService.getAllNewReminders();
+			ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandNewViewAdaptor(
+													reminderNewListView.getContext(), 
+													entities);	
+			if (Log.isLoggable(TAG_THREAD, Log.DEBUG)){
+				Log.d(TAG_THREAD, "Thread refreshNewVIewTask");
+			}
+			Message msg= Message.obtain(viewHandler, 0, adaptor);
+			viewHandler.sendMessage(msg);	
 		}
 		
 	};
@@ -153,7 +152,16 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 
 		@Override
 		public void run() {
-			viewHandler.sendEmptyMessage(1);	
+			List<ReminderOnDemandEntity> entities = dbService.getAllStartedReminders();
+			ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandStartViewAdaptor(
+													reminderStartListView.getContext(), 
+													entities,
+													conn);	
+			if (Log.isLoggable(TAG_THREAD, Log.DEBUG)){
+				Log.d(TAG_THREAD, "Thread refreshStartViewTask");
+			}
+			Message msg= Message.obtain(viewHandler, 1, adaptor);
+			viewHandler.sendMessage(msg);	
 		}
 		
 	};
@@ -162,7 +170,15 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 
 		@Override
 		public void run() {
-			viewHandler.sendEmptyMessage(2);	
+			List<ReminderOnDemandEntity> entities = dbService.getAllCancelledReminders();
+			ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandCancelViewAdaptor(
+													reminderCancelListView.getContext(), 
+													entities);	
+			if (Log.isLoggable(TAG_THREAD, Log.DEBUG)){
+				Log.d(TAG_THREAD, "Thread refreshCancelViewTask");
+			}
+			Message msg= Message.obtain(viewHandler, 2, adaptor);
+			viewHandler.sendMessage(msg);		
 		}
 		
 	};
@@ -171,7 +187,15 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 
 		@Override
 		public void run() {
-			viewHandler.sendEmptyMessage(3);	
+			List<ReminderOnDemandEntity> entities = dbService.getAllDoneReminders();
+			ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandDoneViewAdaptor(
+													reminderDoneListView.getContext(), 
+													entities);	
+			if (Log.isLoggable(TAG_THREAD, Log.DEBUG)){
+				Log.d(TAG_THREAD, "Thread refreshDoneViewTask");
+			}
+			Message msg= Message.obtain(viewHandler, 3, adaptor);
+			viewHandler.sendMessage(msg);		
 		}
 		
 	};
@@ -234,9 +258,32 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 				{
 					Log.d(getClass().getSimpleName(), "speakBtn Touch event: ACTION_UP");
 					String recordLoc = recordOnDemand.stopRecording();
-					Intent intent = new Intent(ReminderOnDemandActivity.this, ReminderOnDemandSettingsActivity.class);
-					intent.putExtra("recordLoc", recordLoc);
-					ReminderOnDemandActivity.this.startActivity(intent);
+					long id = System.currentTimeMillis();
+					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ReminderOnDemandActivity.this);
+					SimpleDateFormat sdf=new SimpleDateFormat("MM/dd HH:mm:ss");
+					String name = sdf.format(new Date(id));
+					String desc = prefs.getString("desc", "This is your reminder");
+					String getStr = prefs.getString("interval", "");
+					String getAutoStartTime = prefs.getString("start", "Never");
+					int interval = 15*60*1000;
+					int autoStartTime = -1;
+					try{
+						autoStartTime = Integer.parseInt(getAutoStartTime);
+						interval = Integer.parseInt(getStr);
+					}catch(NumberFormatException nfe){
+						Log.w(this.getClass().getSimpleName(), "parse string to int error, use default value 15mins");
+					}
+					ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, id, interval*60*1000, 1/*frequency=1*/, autoStartTime, 0/*state new*/);
+					dbService.insert(entity);
+					if (Log.isLoggable(TAG_ACTIVITY, Log.DEBUG)){
+						Log.d(TAG_ACTIVITY, "New reminder[" + name +"] created");
+					}	
+					
+					new Thread(refreshNewViewTask).start();
+					
+//					Intent intent = new Intent(ReminderOnDemandActivity.this, ReminderOnDemandSettingsActivity.class);
+//					intent.putExtra("recordLoc", recordLoc);
+//					ReminderOnDemandActivity.this.startActivityForResult(intent, RETURN_CODE_FROM_SETTINGS);
 					break;
 				}
 				default:
@@ -263,7 +310,23 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 	}
 
 
-
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		 menu.add(0, Menu.FIRST, 0, "Preference");
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()){
+		case Menu.FIRST:
+			 Log.d(this.getClass().getSimpleName(), " First item selected!");
+			 Intent intent = new Intent(ReminderOnDemandActivity.this, ReminderOnDemandPrefrenceActivity.class);
+			 ReminderOnDemandActivity.this.startActivity(intent);
+			 break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 
 	@Override
 	protected void onDestroy() {
@@ -277,22 +340,20 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
     	}
 		super.onDestroy();
 	}
-
-	@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		// TODO Auto-generated method stub
-		
-	}
 	
 	@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            // Fill the list view with the strings the recognizer thought it could have heard
-            ArrayList<String> matches = data.getStringArrayListExtra(
-                    RecognizerIntent.EXTRA_RESULTS);
-            for(String str: matches){
-            	Log.d(TAG_SPEECH, str);
-            }
+//            // Fill the list view with the strings the recognizer thought it could have heard
+//            ArrayList<String> matches = data.getStringArrayListExtra(
+//                    RecognizerIntent.EXTRA_RESULTS);
+//            for(String str: matches){
+//            	Log.d(TAG_SPEECH, str);
+//            }
+        }
+        
+        if (requestCode == RETURN_CODE_FROM_SETTINGS && resultCode == RESULT_OK){
+        	new Thread(refreshNewViewTask).start();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -337,6 +398,17 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
          reminderCancelListView = (ListView) 
          		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
        
+//         reminderNewListView.setOnItemClickListener(new OnItemClickListener(){
+//
+//			@Override
+//			public void onItemClick(AdapterView<?> parent, View view,
+//					int position, long id) {
+//				Object obj = reminderNewListView.getItemAtPosition(position);
+//				Intent intent = new Intent(ReminderOnDemandActivity.this, ReminderOnDemandSettingsActivity.class);
+//				ReminderOnDemandActivity.this.startActivityForResult(intent, RETURN_CODE_FROM_SETTINGS);
+//			}
+//        	 
+//         });
          pagesArrayList.add(reminderNewListView);
          pagesArrayList.add(reminderStartListView);
 		 pagesArrayList.add(reminderCancelListView);	
@@ -347,8 +419,9 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
          viewPager.setOnPageChangeListener(new ReminderOnDemaindPageChangeListener());
          viewPager.setCurrentItem(0);
          
-         ses = Executors.newScheduledThreadPool(1);
+         ses = Executors.newScheduledThreadPool(2);
          ses.scheduleWithFixedDelay(refreshNewViewTask, 0, 1*60, TimeUnit.SECONDS);
+         ses.scheduleWithFixedDelay(refreshStartViewTask, 1*60, 1*60, TimeUnit.SECONDS);
          Log.d(getClass().getSimpleName(), "onCreate() invoked, timer.schedule invoked");
         
     }
@@ -356,29 +429,29 @@ public class ReminderOnDemandActivity extends Activity implements OnItemClickLis
 	private class ReminderOnDemaindPageChangeListener implements OnPageChangeListener{
         @Override
         public   void onPageScrollStateChanged (int state){
-            // TODO Auto-generated method stub
+        	
         }
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            // TODO Auto-generated method stub
+        	
         }
-        Color preColor;
+
         @Override
         public void onPageSelected(int position) {
             Log.d(TAG_PAGE,  "Current Page Position =" + position);
             switch(position)
             {
             case 0:  	
-            	viewHandler.sendEmptyMessage(0);
+            	new Thread(refreshNewViewTask).start();
             	break;
             case 1:
-            	viewHandler.sendEmptyMessage(1);
+            	new Thread(refreshStartViewTask).start();
             	break;
             case 2:
-            	viewHandler.sendEmptyMessage(2);
+            	new Thread(refreshCancelViewTask).start();
             	break;
             case 3:
-            	viewHandler.sendEmptyMessage(3);
+            	new Thread(refreshDoneViewTask).start();
             }
         }
     }

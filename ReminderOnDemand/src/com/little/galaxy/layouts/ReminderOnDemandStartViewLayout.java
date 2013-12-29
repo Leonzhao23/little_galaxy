@@ -36,7 +36,7 @@ public class ReminderOnDemandStartViewLayout extends LinearLayout {
         super(context);
        
       	SimpleDateFormat sdf=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-      	String timeCreate =  "The Reminder created at " + sdf.format(new Date(entity.getCreateTime()));
+      	String timeCreate =  "The Reminder started at " + sdf.format(new Date(entity.getCreateTime()));
       	
       	int interval = entity.getInterval();
       	Log.d(TAG, "Interval: " + interval);

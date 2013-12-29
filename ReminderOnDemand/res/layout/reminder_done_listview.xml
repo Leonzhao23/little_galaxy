@@ -27,6 +27,11 @@
     	android:layout_width="wrap_content"   
     	android:layout_height="wrap_content"  
     	android:textSize="15sp" />
+     <TextView 
+    	android:id="@+id/exec_time" 
+    	android:layout_width="wrap_content"   
+    	android:layout_height="wrap_content"  
+    	android:textSize="12sp" />
 
      <LinearLayout
         android:layout_width="wrap_content"
@@ -71,32 +76,6 @@
         android:layout_weight="3"
         android:gravity="bottom|right"
         android:orientation="horizontal" >
-     
-         <ImageButton
-            android:id="@+id/edit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:paddingBottom="0dp"
-            android:paddingLeft="0dp"
-            android:paddingRight="0dp"
-            android:paddingTop="0dp"
-            android:src="@drawable/edit" />
-
-        <ImageButton
-            android:id="@+id/start"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:clickable="true"
-            android:contentDescription="@string/start"
-            android:onClick="@string/start"
-            android:paddingBottom="0dp"
-            android:paddingLeft="0dp"
-            android:paddingRight="0dp"
-            android:paddingTop="0dp"
-            android:src="@drawable/start" />
-         
 
         <ImageButton
             android:id="@+id/del"
@@ -107,7 +86,6 @@
             android:paddingLeft="0dp"
             android:paddingRight="5dp"
             android:paddingTop="0dp"
-
             android:src="@drawable/delete" />
     
     </LinearLayout>  

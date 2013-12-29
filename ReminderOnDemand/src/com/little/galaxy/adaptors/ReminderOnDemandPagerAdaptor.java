@@ -38,8 +38,7 @@ public class ReminderOnDemandPagerAdaptor extends PagerAdapter {
 	
 	@Override
 	public void destroyItem(ViewGroup container, int position, Object object) {
-		container.removeView(listViews.get(position));  
-		super.destroyItem(container, position, object);
+		container.removeView(listViews.get(position));  		
 	}
 
 	@Override

@@ -22,7 +22,7 @@ public interface IDBService {
 	
 	public List<ReminderOnDemandEntity> getAllNewReminders();
 	
-	public List<ReminderOnDemandEntity> getAllStartReminders();
+	public List<ReminderOnDemandEntity> getAllStartedReminders();
 	
 	public List<ReminderOnDemandEntity> getAllDoneReminders();
 	
@@ -33,6 +33,8 @@ public interface IDBService {
 	public void cleanup();
 
 	boolean updateStartTime(ReminderOnDemandEntity entity);
+
+	ReminderOnDemandEntity getReminderById(long id);
 
 	
 

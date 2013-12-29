@@ -72,7 +72,7 @@ public class ReminderOnDemandService extends Service {
 		scheduleMap = new ConcurrentHashMap<String, ScheduledFuture<?>>();
 		nm = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 		dbService = DBServiceFactory.getDBService(DBType.SQLite, ReminderOnDemandService.this);
-		List <ReminderOnDemandEntity> reminders = dbService.getAllStartReminders();
+		List <ReminderOnDemandEntity> reminders = dbService.getAllStartedReminders();
 		for (ReminderOnDemandEntity reminderOnDemandEntity : reminders) {
 			int interval  = reminderOnDemandEntity.getInterval();
 			long create_time = reminderOnDemandEntity.getCreateTime();
@@ -92,8 +92,10 @@ public class ReminderOnDemandService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.d(TAG_SERVICE, "Service onStart!");
-		List <ReminderOnDemandEntity> reminders = dbService.getAllNewReminders();
-		for (ReminderOnDemandEntity reminderOnDemandEntity : reminders) {
+		
+		long id = intent.getLongExtra("newReminderId", System.currentTimeMillis());
+		ReminderOnDemandEntity reminderOnDemandEntity = dbService.getReminderById(id);
+		if (reminderOnDemandEntity != null){
 			int interval  = reminderOnDemandEntity.getInterval();
 			//ReminderOnDemandTimerTask timerTask = new ReminderOnDemandTimerTask(reminderOnDemandEntity);
 			//timer.schedule(timerTask, interval);
@@ -103,6 +105,7 @@ public class ReminderOnDemandService extends Service {
 			Log.d(TAG_SERVICE, "Task [" + reminderOnDemandEntity.getName() + "] scheduled. Interval=" + interval);
 			dbService.updateByState(reminderOnDemandEntity, ReminderOnDemandEntity.ReminderState.Start.getState());
 		}
+		
 		return super.onStartCommand(intent, flags, startId);
 	}
 
@@ -143,7 +146,12 @@ public class ReminderOnDemandService extends Service {
 	@Override
 	public void onDestroy() {
 		Log.d(TAG_SERVICE, "Service onDestroy!");
-		mp.stop();
+		
+		if (mp != null){
+			mp.stop();
+			mp = null;
+		}
+	
 		if (dbService != null){
 			dbService.cleanup();
 		}
