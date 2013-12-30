@@ -10,12 +10,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.ColorMatrixColorFilter;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 
 import com.little.galaxy.R;
+import com.little.galaxy.activities.ReminderOnDemandActivity;
 import com.little.galaxy.activities.ReminderOnDemandSettingsActivity;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.services.ReminderOnDemandService;
@@ -59,7 +61,8 @@ public class ReminderOnDemandNewViewAdaptor extends ReminderOnDemandViewAdaptor 
 				Log.d(TAG_ACTIVITY, "Try to start service!");
 				context.startService(intent);
 				v.getBackground().setColorFilter(new ColorMatrixColorFilter(BT_CLICK));
-				v.setBackground(v.getBackground());		
+				v.setBackground(v.getBackground());					
+				new Thread(((ReminderOnDemandActivity)context).getRefreshNewViewTask()).start();
 			}
 	      });
 	    holder.edit.setOnClickListener(new View.OnClickListener() {
@@ -77,6 +80,7 @@ public class ReminderOnDemandNewViewAdaptor extends ReminderOnDemandViewAdaptor 
 				IDBService dbService = DBServiceFactory.getDBService(DBType.SQLite, context);
 				dbService.delete(entity.getId());
 				dbService.cleanup();
+				new Thread(((ReminderOnDemandActivity)context).getRefreshNewViewTask()).start();
 			}	
 	    });
 		  

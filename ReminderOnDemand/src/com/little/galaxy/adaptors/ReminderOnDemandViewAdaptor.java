@@ -69,8 +69,8 @@ public abstract class ReminderOnDemandViewAdaptor extends BaseAdapter {
 	       	holder = (ViewHolder)view.getTag();
 	    }
 		
-		holder.subject.setText(entity.getName());
-        holder.desc.setText(entity.getDesc());
+		holder.subject.setText(context.getResources().getString(R.string.reminder_view_subject) +": " + entity.getName());
+        holder.desc.setText(context.getResources().getString(R.string.reminder_view_desc) + ": " + entity.getDesc());
         
         holder.play.setOnClickListener(new View.OnClickListener() {
 			@Override

@@ -74,6 +74,10 @@ public class ReminderOnDemandActivity extends Activity {
 	private boolean bind = false;
 	private boolean canSpeechRecognized = false; 
 	
+	public Runnable getRefreshNewViewTask(){
+		return refreshNewViewTask;
+	}
+	
 	
 	private Handler viewHandler = new Handler(){
 		@Override
@@ -263,9 +267,9 @@ public class ReminderOnDemandActivity extends Activity {
 					SimpleDateFormat sdf=new SimpleDateFormat("MM/dd HH:mm:ss");
 					String name = sdf.format(new Date(id));
 					String desc = prefs.getString("desc", "This is your reminder");
-					String getStr = prefs.getString("interval", "");
+					String getStr = prefs.getString("interval", "15");
 					String getAutoStartTime = prefs.getString("start", "Never");
-					int interval = 15*60*1000;
+					int interval = 15;
 					int autoStartTime = -1;
 					try{
 						autoStartTime = Integer.parseInt(getAutoStartTime);

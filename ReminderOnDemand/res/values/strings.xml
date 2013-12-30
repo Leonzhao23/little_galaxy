@@ -14,8 +14,8 @@
     <string name="reminder_done_text">Completed reminders</string>
     <string name="reminder_cancel_text">Cancelled reminders</string>
     <string name="reminder_exec_time">The reminder will be executed after </string>
-    <string name="reminder_start_view_subject">Subject</string>
-    <string name="reminder_start_view_desc">Description</string>
+    <string name="reminder_view_subject">Name</string>
+    <string name="reminder_view_desc">Desc</string>
     <string name="start">button_start</string>
 
 </resources>

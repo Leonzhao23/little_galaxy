@@ -2,15 +2,7 @@
 <resources>
 
     <string name="app_name">随心记录，按需提醒</string>
-    <string name="action_settings">Settings</string>
-    <string name="reminder">5分钟内的提醒</string>
-    <string name="button_name">Speak</string>
-    <string name="button_stop">Stop</string>
-    <string name="button_view">View</string>
-    <string name="title_activity_reminder_on_demand_view">ReminderOnDemandViewActivity</string>
-    <string name="reminder_view">View All Reminders</string>
-    <string name="reminder_done">Showing the latest done reminders</string>
-    <string name="reminder_start_view_subject">Subject</string>
-    <string name="reminder_start_view_desc">Description</string>
+    <string name="reminder_view_subject">名字</string>
+    <string name="reminder_view_desc">描述</string>
 
 </resources>

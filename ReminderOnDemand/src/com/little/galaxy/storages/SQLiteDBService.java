@@ -106,6 +106,7 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 		long now = System.currentTimeMillis();
 		switch(state){
 		case 0:
+			break;
 		case 1:
 			values.put("create_time", now);
 			break;

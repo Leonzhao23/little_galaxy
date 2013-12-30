@@ -54,7 +54,7 @@ public class ReminderOnDemandStartViewAdaptor extends
 
 	@Override
 	protected void addHolders(View view, final ReminderOnDemandEntity entity) {
-		//nothing needs
+		
 		SimpleDateFormat sdf=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
       	String startTime =  "The Reminder started at " + sdf.format(new Date(entity.getCreateTime()));
       	
@@ -73,8 +73,7 @@ public class ReminderOnDemandStartViewAdaptor extends
       	holder.execTime = (TextView)view.findViewById(R.id.exec_time);;
       	holder.execTime.setText(context.getResources().getString(R.string.reminder_exec_time) + " "+ minutes + " minutes");
     
-        holder.cancel = (ImageButton)view.findViewById(R.id.cancel_time);
-        holder.cancel.setImageDrawable((context.getResources().getDrawable(R.drawable.cancel)));
+        holder.cancel = (ImageButton)view.findViewById(R.id.cancel);
         holder.cancel.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {

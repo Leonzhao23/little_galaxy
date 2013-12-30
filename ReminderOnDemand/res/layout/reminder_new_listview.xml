@@ -40,7 +40,7 @@
     	     android:layout_height="wrap_content"
     	     android:background="@color/white"
     	     android:paddingBottom="0dp"
-    	     android:paddingLeft="0dp"
+    	     android:paddingLeft="10dp"
     	     android:paddingRight="0dp"
     	     android:paddingTop="0dp"
     	     android:src="@drawable/play_little" />
@@ -51,7 +51,7 @@
     	     android:layout_height="wrap_content"
     	     android:background="@color/white"
     	     android:paddingBottom="0dp"
-    	     android:paddingLeft="0dp"
+    	     android:paddingLeft="5dp"
     	     android:paddingRight="0dp"
     	     android:paddingTop="0dp"
     	     android:src="@drawable/stop_little" />
@@ -68,20 +68,21 @@
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
         android:layout_marginTop="0dp"
-        android:layout_weight="3"
+        android:layout_weight="2"
         android:gravity="bottom|right"
         android:orientation="horizontal" >
      
          <ImageButton
-            android:id="@+id/edit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:paddingBottom="0dp"
-            android:paddingLeft="0dp"
-            android:paddingRight="0dp"
-            android:paddingTop="0dp"
-            android:src="@drawable/edit" />
+             android:id="@+id/edit"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:background="@color/white"
+             android:paddingBottom="0dp"
+             android:paddingLeft="0dp"
+             android:paddingRight="5dp"
+             android:paddingTop="0dp"
+             android:scrollbarAlwaysDrawVerticalTrack="false"
+             android:src="@drawable/edit" />
 
         <ImageButton
             android:id="@+id/start"
@@ -93,21 +94,21 @@
             android:onClick="@string/start"
             android:paddingBottom="0dp"
             android:paddingLeft="0dp"
-            android:paddingRight="0dp"
+            android:paddingRight="5dp"
             android:paddingTop="0dp"
+            android:scrollbarAlwaysDrawVerticalTrack="false"
             android:src="@drawable/start" />
          
-
         <ImageButton
             android:id="@+id/del"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/white"
+            android:focusable="false"
             android:paddingBottom="0dp"
             android:paddingLeft="0dp"
             android:paddingRight="5dp"
             android:paddingTop="0dp"
-
             android:src="@drawable/delete" />
     
     </LinearLayout>  

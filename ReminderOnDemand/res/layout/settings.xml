@@ -7,7 +7,7 @@
         android:id="@+id/subj"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/reminder_start_view_subject"
+        android:text="@string/reminder_view_subject"
         />
 
     <EditText
@@ -23,7 +23,7 @@
         android:id="@+id/desc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/reminder_start_view_desc"
+        android:text="@string/reminder_view_desc"
         />
 
     <EditText

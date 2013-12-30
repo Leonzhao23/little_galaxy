@@ -53,6 +53,7 @@ public class ReminderOnDemandCancelViewAdaptor extends
 			public void onClick(View v) {
 				Log.d(TAG_ACTIVITY, "restart the reminder[" + entity.getName() + "]");
 				Intent intent = new Intent(context, ReminderOnDemandService.class);
+				intent.putExtra("newReminderId", entity.getId());
 				Log.d(TAG_ACTIVITY, "Try to start service!");
 				context.startService(intent);	
 			}
