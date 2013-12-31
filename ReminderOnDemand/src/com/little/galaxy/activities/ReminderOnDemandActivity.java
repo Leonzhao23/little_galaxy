@@ -1,11 +1,11 @@
 package com.little.galaxy.activities;
 
+import static com.little.galaxy.utils.ReminderOnDemandConsts.RETURN_CODE_FROM_SETTINGS;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_ACTIVITY;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_HANDLER;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_PAGE;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_SPEECH;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_THREAD;
-import static com.little.galaxy.utils.ReminderOnDemandConsts.RETURN_CODE_FROM_SETTINGS;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -37,8 +36,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
+import android.view.View.OnTouchListener;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
@@ -65,14 +65,28 @@ public class ReminderOnDemandActivity extends Activity {
     private ReminderOnDemandPagerAdaptor pagerAdaptor = null;
     private ListView reminderNewListView = null;
     private ListView reminderStartListView = null;
-    private ListView reminderDoneListView = null;
     private ListView reminderCancelListView = null;
+    private ListView reminderDoneListView = null;
+    private List<ReminderOnDemandEntity> doneEntities;
+    
+    //footer view
+    private View footerView = null;;
+    private boolean enablePullLoad;
+    private boolean pullLoading;
+    private boolean isFooterReady = false;
+    private int startIndex  = 0;
+    private int delta = 2;
+    private float lastY = -1;
+    private final static int PULL_LOAD_MORE_DELTA = 50;
+    private final static float OFFSET_RADIO = 1.8f; 
+    
 	private IDBService dbService = null;
 	private RecordOnDemand recordOnDemand = null;
 	private ScheduledExecutorService ses = null;
 	private ReminderOnDemandServiceConnection conn = null;
 	private boolean bind = false;
 	private boolean canSpeechRecognized = false; 
+	
 	
 	public Runnable getRefreshNewViewTask(){
 		return refreshNewViewTask;
@@ -191,15 +205,20 @@ public class ReminderOnDemandActivity extends Activity {
 
 		@Override
 		public void run() {
-			List<ReminderOnDemandEntity> entities = dbService.getAllDoneReminders();
+			if (doneEntities == null){
+				doneEntities = dbService.getFilterReminders(new String[]{"2", String.valueOf(startIndex), String.valueOf(delta)});
+			} else{
+				doneEntities.addAll(dbService.getFilterReminders(new String[]{"2", String.valueOf(startIndex), String.valueOf(delta)}));
+			}
+			
 			ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandDoneViewAdaptor(
 													reminderDoneListView.getContext(), 
-													entities);	
+													doneEntities);	
 			if (Log.isLoggable(TAG_THREAD, Log.DEBUG)){
 				Log.d(TAG_THREAD, "Thread refreshDoneViewTask");
 			}
 			Message msg= Message.obtain(viewHandler, 3, adaptor);
-			viewHandler.sendMessage(msg);		
+			viewHandler.sendMessage(msg);	
 		}
 		
 	};
@@ -331,6 +350,7 @@ public class ReminderOnDemandActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
 
 	@Override
 	protected void onDestroy() {
@@ -396,12 +416,17 @@ public class ReminderOnDemandActivity extends Activity {
          reminderStartListView = (ListView) 
          		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
          
+         reminderCancelListView = (ListView) 
+         		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
+         
          reminderDoneListView = (ListView) 
          		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
          
-         reminderCancelListView = (ListView) 
-         		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
-       
+         footerView = layoutInflater.inflate(R.layout.listview_footer, null);
+         reminderDoneListView.addFooterView(footerView);
+         footerView.setVisibility(View.INVISIBLE);
+         reminderDoneListView.setOnScrollListener(new ReminderOnDemandOnScrollAndTouch());
+         
 //         reminderNewListView.setOnItemClickListener(new OnItemClickListener(){
 //
 //			@Override
@@ -420,7 +445,7 @@ public class ReminderOnDemandActivity extends Activity {
 		 
          pagerAdaptor = new ReminderOnDemandPagerAdaptor(pagesArrayList, titles);
          viewPager.setAdapter(pagerAdaptor);
-         viewPager.setOnPageChangeListener(new ReminderOnDemaindPageChangeListener());
+         viewPager.setOnPageChangeListener(new ReminderOnDemandPageChangeListener());
          viewPager.setCurrentItem(0);
          
          ses = Executors.newScheduledThreadPool(2);
@@ -430,7 +455,7 @@ public class ReminderOnDemandActivity extends Activity {
         
     }
 	
-	private class ReminderOnDemaindPageChangeListener implements OnPageChangeListener{
+	private class ReminderOnDemandPageChangeListener implements OnPageChangeListener{
         @Override
         public   void onPageScrollStateChanged (int state){
         	
@@ -455,9 +480,71 @@ public class ReminderOnDemandActivity extends Activity {
             	new Thread(refreshCancelViewTask).start();
             	break;
             case 3:
-            	new Thread(refreshDoneViewTask).start();
+            	if (doneEntities == null){
+            		new Thread(refreshDoneViewTask).start();
+            	}
             }
         }
     }
+	
+	private class ReminderOnDemandOnScrollAndTouch  implements OnScrollListener, OnTouchListener {
+
+		@Override
+		public void onScroll(AbsListView listview, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+			
+		}
+
+		@Override
+		public void onScrollStateChanged(AbsListView listview, int scrollState) {
+			switch (scrollState){
+				case OnScrollListener.SCROLL_STATE_IDLE:
+					// for footer
+					if (listview.getLastVisiblePosition() == (listview.getCount() - 1)) {
+						if (footerView != null){
+							footerView.setVisibility(View.VISIBLE);
+						}
+						if (listview.getCount() < startIndex + delta){
+							
+						} else{
+							startIndex = startIndex + delta;
+							new Thread(refreshDoneViewTask).start();
+						}
+						
+					}
+					// for header
+					if(listview.getFirstVisiblePosition() == 0){
+						
+			        }
+
+			     break;
+			}
+			
+		 		
+			
+		}
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			switch (event.getAction()){
+			case MotionEvent.ACTION_DOWN:
+				 lastY = event.getRawY();
+			case MotionEvent.ACTION_MOVE:
+				 final float deltaY = event.getRawY() - lastY;
+                 lastY = event.getRawY();
+                 if (reminderDoneListView.getLastVisiblePosition() == reminderDoneListView.getCount() - 1
+                     || deltaY < 0) {
+                
+                 }
+			default:
+					
+			
+			}
+			return false;
+			
+		}
+
+		
+		
+	}
     
 }
