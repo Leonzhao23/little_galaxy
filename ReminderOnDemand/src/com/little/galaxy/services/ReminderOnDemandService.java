@@ -2,6 +2,7 @@ package com.little.galaxy.services;
 
 
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_SERVICE;
+import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_MEDIA;
 
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ public class ReminderOnDemandService extends Service {
 			sendNotification(R.drawable.ic_launcher, entity.getName(), entity.getRecoredLoc());
 			mp = MediaPlayer.create(ReminderOnDemandService.this, recordLoc);	
 			try {
+				Log.d(TAG_MEDIA, "Begin play the reminder[" + entity.getName() +"]");
 				reminderOnDemandBind.play();
 			} catch (RemoteException re) {
 				Log.e(getClass().getSimpleName(), "MediaPlayer encounters problems", re);
@@ -148,7 +150,8 @@ public class ReminderOnDemandService extends Service {
 		Log.d(TAG_SERVICE, "Service onDestroy!");
 		
 		if (mp != null){
-			mp.stop();
+			mp.reset();
+			mp.release();
 			mp = null;
 		}
 	

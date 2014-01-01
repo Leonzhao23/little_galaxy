@@ -20,6 +20,10 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	public static final String DB_NAME = "reminder_db";
 	public static final String DB_TABLE = "reminder_table";
 	public static final int DB_VERSION = 3;
+	
+	private static final String sqlOfLatestReminders = "select * from " + DB_TABLE + " where state=? and exec_time >? order by exec_time desc limit ?";
+	private static final String sqlOfOlderReminders = "select * from " + DB_TABLE + " where state=? and exec_time <? order by exec_time desc limit ?";
+	private static final String sqlOfDoneReminders = "select * from " + DB_TABLE + " where state=? order by exec_time desc limit ?";
 
 	private static final String CLASSNAME = SQLiteDBService.class.getSimpleName();
 	private static final String[] COLS = new String[] { "id", "name", "desc", "record_loc", "create_time", "exec_time", "interval", "frequency", "auto_start_time", "state" };
@@ -119,7 +123,7 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 		if (db.update(DB_TABLE, values, "id=" + entity.getId(), null) < 1){
 			return false;
 		}
-		Log.d(TAG_DB, "exec updateByState() successfully");
+		Log.d(TAG_DB, "exec updateByState(" + state  + ") successfully");
 		return true;
 	}
 	
@@ -259,7 +263,6 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	 	            	int state = c.getInt(9);
 	 	            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, interval, frequency, autoStartTime, state);
 	 	            	ret.add(entity);
-	 	            	c.moveToNext();
 	                }
 	            }
 	        } catch (SQLException e) {
@@ -272,45 +275,12 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	        return ret;  
 	}
 	
-	@Override
-	public List<ReminderOnDemandEntity> getAllDoneReminders() {
-		 Cursor c = null;
-	        ArrayList<ReminderOnDemandEntity> ret = new ArrayList<ReminderOnDemandEntity>();
-	        try {
-	            c = this.db.query(DB_TABLE, COLS, "state=2", null, null, null, null);
-	            if (c != null){
-	            	while(c.moveToNext()) {
-		            	long id = c.getLong(0);
-		            	String name = c.getString(1);
-		            	String desc = c.getString(2);
-		            	String recordLoc = c.getString(3);
-		            	long createTime = c.getLong(4);
-		            	long execTime = c.getLong(5);
-		            	int interval = c.getInt(6);
-		            	int frequency = c.getInt(7);
-		            	int autoStartTime = c.getInt(8);
-		            	int state = c.getInt(9);
-		            	ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, createTime, execTime, interval, frequency, autoStartTime, state);
-		            	ret.add(entity);
-		            }
-	            }      
-	        } catch (SQLException e) {
-	            Log.v(CLASSNAME, CLASSNAME, e);
-	        } finally {
-	            if (c != null && !c.isClosed()) {
-	                c.close();
-	            }
-	        }
-	        return ret;
-	}
 	
-	
-	@Override
-	public List<ReminderOnDemandEntity> getFilterReminders(String filters[]) {
+	private List<ReminderOnDemandEntity> getFilterReminders(String sql, String filters[]) {
 		    Cursor c = null;
 	        ArrayList<ReminderOnDemandEntity> ret = new ArrayList<ReminderOnDemandEntity>();
 	        try {
-	            c = this.db.rawQuery("select * from " + DB_TABLE + " where state=? order by exec_time desc limit ?, ?", filters);
+	            c = this.db.rawQuery(sql, filters);
 	            if (c != null){
 	            	while(c.moveToNext()) {
 		            	long id = c.getLong(0);
@@ -335,6 +305,24 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	            }
 	        }
 	        return ret;
+	}
+	
+	@Override
+	public List<ReminderOnDemandEntity> getDoneReminders(String state, int num) {
+		String filters[] = new String[]{state, String.valueOf(num)};
+		return getFilterReminders(sqlOfDoneReminders, filters);
+	}
+	
+	@Override
+	public List<ReminderOnDemandEntity> getLatestReminders(String state, long latestReminderExecTime, int num) {
+		String filters[] = new String[]{state, String.valueOf(latestReminderExecTime), String.valueOf(num)};
+		return getFilterReminders(sqlOfLatestReminders, filters);
+	}
+	
+	@Override
+	public List<ReminderOnDemandEntity> getOlderReminders(String state, long lastReminderExecTime, int num) {
+		String filters[] = new String[]{state, String.valueOf(lastReminderExecTime), String.valueOf(num)};
+		return getFilterReminders(sqlOfOlderReminders, filters);
 	}
 	
 	@Override

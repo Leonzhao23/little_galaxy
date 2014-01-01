@@ -1,14 +1,10 @@
 package com.little.galaxy.adaptors;
 
-import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_ACTIVITY;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_VIEW;
 
 import java.util.List;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.ColorMatrixColorFilter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,10 +15,6 @@ import android.widget.TextView;
 import com.little.galaxy.PlayOnDemand;
 import com.little.galaxy.R;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
-import com.little.galaxy.services.ReminderOnDemandService;
-import com.little.galaxy.storages.DBServiceFactory;
-import com.little.galaxy.storages.DBType;
-import com.little.galaxy.storages.IDBService;
 
 public abstract class ReminderOnDemandViewAdaptor extends BaseAdapter {
 	

@@ -17,5 +17,6 @@
     <string name="reminder_view_subject">Name</string>
     <string name="reminder_view_desc">Desc</string>
     <string name="start">button_start</string>
+    <string name="listview_header_hint_normal"> pull down to refresh</string>
 
 </resources>

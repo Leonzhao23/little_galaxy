@@ -36,53 +36,59 @@ public final class R {
     public static final class drawable {
         public static final int cancel=0x7f020000;
         public static final int delete=0x7f020001;
-        public static final int edit=0x7f020002;
-        public static final int ic_launcher=0x7f020003;
-        public static final int pause=0x7f020004;
-        public static final int play=0x7f020005;
-        public static final int play_little=0x7f020006;
-        public static final int restart=0x7f020007;
-        public static final int speak=0x7f020008;
-        public static final int speak_down=0x7f020009;
-        public static final int speak_up=0x7f02000a;
-        public static final int splash=0x7f02000b;
-        public static final int start=0x7f02000c;
-        public static final int start1=0x7f02000d;
-        public static final int start2=0x7f02000e;
-        public static final int start3=0x7f02000f;
-        public static final int start4=0x7f020010;
-        public static final int start5=0x7f020011;
-        public static final int stop=0x7f020012;
-        public static final int stop_little=0x7f020013;
+        public static final int drop_down_list_arrow=0x7f020002;
+        public static final int edit=0x7f020003;
+        public static final int ic_launcher=0x7f020004;
+        public static final int pause=0x7f020005;
+        public static final int play=0x7f020006;
+        public static final int play_little=0x7f020007;
+        public static final int restart=0x7f020008;
+        public static final int speak=0x7f020009;
+        public static final int speak_down=0x7f02000a;
+        public static final int speak_up=0x7f02000b;
+        public static final int splash=0x7f02000c;
+        public static final int start=0x7f02000d;
+        public static final int start1=0x7f02000e;
+        public static final int start2=0x7f02000f;
+        public static final int start3=0x7f020010;
+        public static final int start4=0x7f020011;
+        public static final int start5=0x7f020012;
+        public static final int stop=0x7f020013;
+        public static final int stop_little=0x7f020014;
     }
     public static final class id {
-        public static final int auto_start=0x7f0b001a;
+        public static final int auto_start=0x7f0b001f;
         public static final int button1=0x7f0b0001;
-        public static final int cancel=0x7f0b0012;
-        public static final int cancel_time=0x7f0b0009;
-        public static final int del=0x7f0b000d;
-        public static final int desc=0x7f0b0008;
-        public static final int edit=0x7f0b000f;
-        public static final int edit_desc=0x7f0b0015;
-        public static final int edit_subj=0x7f0b0014;
-        public static final int exec_time=0x7f0b000e;
-        public static final int frequency=0x7f0b0018;
-        public static final int interval=0x7f0b0016;
+        public static final int cancel=0x7f0b0017;
+        public static final int cancel_time=0x7f0b000e;
+        public static final int del=0x7f0b0012;
+        public static final int desc=0x7f0b000d;
+        public static final int edit=0x7f0b0014;
+        public static final int edit_desc=0x7f0b001a;
+        public static final int edit_subj=0x7f0b0019;
+        public static final int exec_time=0x7f0b0013;
+        public static final int frequency=0x7f0b001d;
+        public static final int interval=0x7f0b001b;
         public static final int intro=0x7f0b0002;
         public static final int listView=0x7f0b0003;
         public static final int listview_footer=0x7f0b0004;
         public static final int listview_footer_hint_textview=0x7f0b0006;
         public static final int listview_footer_progressbar=0x7f0b0005;
-        public static final int play=0x7f0b000a;
-        public static final int restart=0x7f0b000c;
-        public static final int spinner_auto_start=0x7f0b001b;
-        public static final int spinner_frequency=0x7f0b0019;
-        public static final int spinner_interval=0x7f0b0017;
-        public static final int start=0x7f0b0010;
-        public static final int start_time=0x7f0b0011;
-        public static final int stop=0x7f0b000b;
-        public static final int subj=0x7f0b0013;
-        public static final int subject=0x7f0b0007;
+        public static final int listview_header_arrow=0x7f0b000a;
+        public static final int listview_header_hint_textview=0x7f0b0008;
+        public static final int listview_header_progressbar=0x7f0b000b;
+        public static final int listview_header_text=0x7f0b0007;
+        public static final int listview_header_time=0x7f0b0009;
+        public static final int play=0x7f0b000f;
+        public static final int restart=0x7f0b0011;
+        public static final int spinner_auto_start=0x7f0b0020;
+        public static final int spinner_frequency=0x7f0b001e;
+        public static final int spinner_interval=0x7f0b001c;
+        public static final int start=0x7f0b0015;
+        public static final int start_time=0x7f0b0016;
+        public static final int stop=0x7f0b0010;
+        public static final int subj=0x7f0b0018;
+        public static final int subject=0x7f0b000c;
         public static final int viewPager=0x7f0b0000;
     }
     public static final class layout {
@@ -90,11 +96,12 @@ public final class R {
         public static final int activity_reminder_on_demand_view=0x7f030001;
         public static final int activity_splash=0x7f030002;
         public static final int listview_footer=0x7f030003;
-        public static final int reminder_cancel_listview=0x7f030004;
-        public static final int reminder_done_listview=0x7f030005;
-        public static final int reminder_new_listview=0x7f030006;
-        public static final int reminder_start_listview=0x7f030007;
-        public static final int settings=0x7f030008;
+        public static final int listview_header=0x7f030004;
+        public static final int reminder_cancel_listview=0x7f030005;
+        public static final int reminder_done_listview=0x7f030006;
+        public static final int reminder_new_listview=0x7f030007;
+        public static final int reminder_start_listview=0x7f030008;
+        public static final int settings=0x7f030009;
     }
     public static final class raw {
         public static final int test=0x7f050000;
@@ -103,17 +110,18 @@ public final class R {
         public static final int app_name=0x7f080000;
         public static final int button_stop=0x7f080003;
         public static final int intro=0x7f080002;
-        public static final int pref_default_desc=0x7f080019;
-        public static final int pref_default_name=0x7f080017;
-        public static final int pref_desc=0x7f080018;
-        public static final int pref_head_frequency=0x7f080014;
-        public static final int pref_head_interval=0x7f080013;
-        public static final int pref_head_start=0x7f080015;
-        public static final int pref_header_desc=0x7f080012;
+        public static final int listview_header_hint_normal=0x7f080010;
+        public static final int pref_default_desc=0x7f08001a;
+        public static final int pref_default_name=0x7f080018;
+        public static final int pref_desc=0x7f080019;
+        public static final int pref_head_frequency=0x7f080015;
+        public static final int pref_head_interval=0x7f080014;
+        public static final int pref_head_start=0x7f080016;
+        public static final int pref_header_desc=0x7f080013;
         /**  General settings 
          */
-        public static final int pref_header_general=0x7f080011;
-        public static final int pref_name=0x7f080016;
+        public static final int pref_header_general=0x7f080012;
+        public static final int pref_name=0x7f080017;
         public static final int reminder_cancel_text=0x7f08000b;
         public static final int reminder_done_more=0x7f080004;
         public static final int reminder_done_text=0x7f08000a;
@@ -126,7 +134,7 @@ public final class R {
         public static final int reminder_view_subject=0x7f08000d;
         public static final int settings=0x7f080001;
         public static final int start=0x7f08000f;
-        public static final int title_activity_reminder_on_demand_settings=0x7f080010;
+        public static final int title_activity_reminder_on_demand_settings=0x7f080011;
         public static final int title_activity_reminder_on_demand_view=0x7f080006;
     }
     public static final class style {

@@ -24,17 +24,22 @@ public interface IDBService {
 	
 	public List<ReminderOnDemandEntity> getAllStartedReminders();
 	
-	public List<ReminderOnDemandEntity> getAllDoneReminders();
-	
 	public List<ReminderOnDemandEntity> getAllCancelledReminders();
-	
-	public List<ReminderOnDemandEntity> getFilterReminders(String[] filters);
 	
 	public void cleanup();
 
 	boolean updateStartTime(ReminderOnDemandEntity entity);
 
 	ReminderOnDemandEntity getReminderById(long id);
+
+	List<ReminderOnDemandEntity> getOlderReminders(String state, long lastReminderExecTime, int num);
+
+	List<ReminderOnDemandEntity> getLatestReminders(String state,long latestReminderExecTime, int num);
+
+	List<ReminderOnDemandEntity> getDoneReminders(String state, int num);
+
+
+	
 
 	
 

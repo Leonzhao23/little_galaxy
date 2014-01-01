@@ -61,9 +61,7 @@ public class ReminderOnDemandViewActivity extends ListActivity {
             public void run() {
             	if (type.equals("start")){
             		reminderOnDemandEntities = dbService.getAllStartedReminders();
-            	} else{
-            		reminderOnDemandEntities = dbService.getAllDoneReminders();
-            	}
+            	} 
                 handler.sendEmptyMessage(0);
             }
         }.start();

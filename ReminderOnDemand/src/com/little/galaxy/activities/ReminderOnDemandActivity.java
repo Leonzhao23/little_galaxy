@@ -11,11 +11,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import android.app.Activity;
 import android.content.Context;
@@ -67,18 +69,26 @@ public class ReminderOnDemandActivity extends Activity {
     private ListView reminderStartListView = null;
     private ListView reminderCancelListView = null;
     private ListView reminderDoneListView = null;
-    private List<ReminderOnDemandEntity> doneEntities;
+    private LinkedList<ReminderOnDemandEntity> doneEntities = new LinkedList<ReminderOnDemandEntity>();
     
+    //locks
+    private ReentrantLock refreshLock = new ReentrantLock();
+    private ReentrantLock loadMoreLock = new ReentrantLock();
+    //header view
+    private View headerView = null;
     //footer view
-    private View footerView = null;;
+    private View footerView = null;
     private boolean enablePullLoad;
     private boolean pullLoading;
     private boolean isFooterReady = false;
-    private int startIndex  = 0;
-    private int delta = 2;
+ 
+    private long ptrLatestExecTime = 0l;
+    private long ptrLastExecTime = 0l;
+    private int doneListViewPullType = 0;// 1 stands for refreshing new, 2 stands for loading more
     private float lastY = -1;
     private final static int PULL_LOAD_MORE_DELTA = 50;
     private final static float OFFSET_RADIO = 1.8f; 
+    private static final int delta = 5;
     
 	private IDBService dbService = null;
 	private RecordOnDemand recordOnDemand = null;
@@ -202,15 +212,55 @@ public class ReminderOnDemandActivity extends Activity {
 	};
 	
 	private Runnable refreshDoneViewTask = new Runnable(){
-
+		
 		@Override
 		public void run() {
-			if (doneEntities == null){
-				doneEntities = dbService.getFilterReminders(new String[]{"2", String.valueOf(startIndex), String.valueOf(delta)});
+			if (doneEntities.isEmpty()){
+				doneEntities.addAll(dbService.getDoneReminders("2", delta));
+				final int size = doneEntities.size();
+				if (doneEntities.size() > 0){
+					ptrLastExecTime = doneEntities.get(0).getExecTime();
+					ptrLatestExecTime = doneEntities.get(size -1).getExecTime();
+				}
+				
 			} else{
-				doneEntities.addAll(dbService.getFilterReminders(new String[]{"2", String.valueOf(startIndex), String.valueOf(delta)}));
+				List<ReminderOnDemandEntity> entities = null;
+				
+				if (doneListViewPullType == 1) {
+					refreshLock.lock();
+					try{
+						entities = dbService.getLatestReminders("2", ptrLatestExecTime, delta);
+						final int size = entities.size();
+						if (size > 0){
+							for (int index= size - 1; index >= 0; index--){
+								ReminderOnDemandEntity entity = entities.get(index);
+								doneEntities.addFirst(entity);
+								if (index == 0){
+									ptrLatestExecTime = entity.getExecTime();
+								}
+							}
+							
+						}
+					} finally{
+						refreshLock.unlock();
+					}
+					
+					
+				} else if (doneListViewPullType == 2) {
+					loadMoreLock.lock();
+					try{
+						entities = dbService.getOlderReminders("2", ptrLastExecTime, delta);
+						final int size = entities.size();
+						if (size > 0){
+							ptrLastExecTime = entities.get(0).getExecTime();
+							doneEntities.addAll(entities);
+						}
+					}finally{
+						loadMoreLock.unlock();
+					}
+					
+				} 
 			}
-			
 			ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandDoneViewAdaptor(
 													reminderDoneListView.getContext(), 
 													doneEntities);	
@@ -290,12 +340,15 @@ public class ReminderOnDemandActivity extends Activity {
 					String getAutoStartTime = prefs.getString("start", "Never");
 					int interval = 15;
 					int autoStartTime = -1;
-					try{
-						autoStartTime = Integer.parseInt(getAutoStartTime);
-						interval = Integer.parseInt(getStr);
-					}catch(NumberFormatException nfe){
-						Log.w(this.getClass().getSimpleName(), "parse string to int error, use default value 15mins");
+					if (!getAutoStartTime.equals("Never")){
+						try{
+							autoStartTime = Integer.parseInt(getAutoStartTime);
+							interval = Integer.parseInt(getStr);
+						}catch(NumberFormatException nfe){
+							Log.w(this.getClass().getSimpleName(), "parse string to int error, use default value 15mins");
+						}
 					}
+				
 					ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, id, interval*60*1000, 1/*frequency=1*/, autoStartTime, 0/*state new*/);
 					dbService.insert(entity);
 					if (Log.isLoggable(TAG_ACTIVITY, Log.DEBUG)){
@@ -351,6 +404,39 @@ public class ReminderOnDemandActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 	
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		if (lastY == -1){
+			lastY = event.getY();
+		}
+		switch (event.getAction()){
+		case MotionEvent.ACTION_DOWN:
+			 lastY = event.getRawY();
+		case MotionEvent.ACTION_MOVE:
+			 final float deltaY = event.getRawY() - lastY;
+             lastY = event.getRawY();
+             if (reminderDoneListView.getLastVisiblePosition() == reminderDoneListView.getCount() - 1
+                 || deltaY < 0) {
+            
+             }
+		default:
+			lastY = -1; 
+            if (reminderDoneListView.getFirstVisiblePosition() == 0) {
+                    if (headerView.getHeight() > 1) {
+                            
+                    }
+                   
+            } else if (reminderDoneListView.getLastVisiblePosition() == reminderDoneListView.getCount() - 1) {
+                   
+            }
+            break;	
+		
+		}
+		return super.onTouchEvent(event);
+	}
+
+
 
 	@Override
 	protected void onDestroy() {
@@ -421,6 +507,9 @@ public class ReminderOnDemandActivity extends Activity {
          
          reminderDoneListView = (ListView) 
          		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
+         
+         headerView = layoutInflater.inflate(R.layout.listview_header, null);
+         reminderDoneListView.addHeaderView(headerView);
          
          footerView = layoutInflater.inflate(R.layout.listview_footer, null);
          reminderDoneListView.addFooterView(footerView);
@@ -503,18 +592,32 @@ public class ReminderOnDemandActivity extends Activity {
 						if (footerView != null){
 							footerView.setVisibility(View.VISIBLE);
 						}
-						if (listview.getCount() < startIndex + delta){
+						if (listview.getCount() < delta){
 							
 						} else{
-							startIndex = startIndex + delta;
+							doneListViewPullType = 2;
 							new Thread(refreshDoneViewTask).start();
 						}
 						
+					} else {
+						if (footerView != null){
+							footerView.setVisibility(View.INVISIBLE);
+						}
 					}
+					
 					// for header
 					if(listview.getFirstVisiblePosition() == 0){
-						
+						if (headerView != null){
+			        		headerView.setVisibility(View.VISIBLE);
+						}
+						doneListViewPullType = 1;
+				        
+			        } else {
+			        	if (headerView != null){
+			        		headerView.setVisibility(View.INVISIBLE);
+						}
 			        }
+					
 
 			     break;
 			}

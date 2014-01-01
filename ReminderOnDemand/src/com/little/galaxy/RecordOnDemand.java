@@ -28,22 +28,20 @@ public class RecordOnDemand {
 	}
 
 	public void doRecording(){
-    	if (mSampleFile == null) {
-    		  //try SD card first
-	          File sDDir = Environment.getExternalStorageDirectory();
-	          if (sDDir.exists() && sDDir.canWrite()){
-	        	  try { 
-		        	  mSampleFile = File.createTempFile(SAMPLE_PREFIX, SAMPLE_EXTENSION, sDDir);
-		          } catch (IOException e) {
-		              Log.e(TAG,"sdcard access error");
-		          }
-	          } else{//internal storage
-	        	  try {
-					mSampleFile = File.createTempFile(SAMPLE_PREFIX, SAMPLE_EXTENSION, ctx.getFilesDir());
-				} catch (IOException e) {
-					Log.e(TAG,"internal storage access error");
-				}
+		//try SD card first
+        File sDDir = Environment.getExternalStorageDirectory();
+        if (sDDir.exists() && sDDir.canWrite()){
+      	  try { 
+	        	  mSampleFile = File.createTempFile(SAMPLE_PREFIX, SAMPLE_EXTENSION, sDDir);
+	          } catch (IOException e) {
+	              Log.e(TAG,"sdcard access error");
 	          }
+        } else{//internal storage
+      	  try {
+				mSampleFile = File.createTempFile(SAMPLE_PREFIX, SAMPLE_EXTENSION, ctx.getFilesDir());
+			} catch (IOException e) {
+				Log.e(TAG,"internal storage access error");
+			}
         }
     	Log.d(TAG, "record file to " + mSampleFile.getAbsolutePath());
    	    mRecorder = new MediaRecorder();
@@ -59,14 +57,18 @@ public class RecordOnDemand {
 			e1.printStackTrace();
 		}
         mRecorder.start();
+        Log.d(TAG, "record start");
    }
    
    public String stopRecording(){
-	   mRecorder.stop();
-	   mRecorder.release();
-	   if (mSampleFile.exists()){
-		   Log.d(TAG, "record as " + mSampleFile.getAbsolutePath());
-		   return mSampleFile.getAbsolutePath();
+	   if (mRecorder != null){
+		   mRecorder.stop();
+		   mRecorder.release();
+		   Log.d(TAG, "record stop");
+		   if (mSampleFile.exists()){
+			   Log.d(TAG, "record as " + mSampleFile.getAbsolutePath());
+			   return mSampleFile.getAbsolutePath();
+		   }
 	   }
 	   return null;
    }
