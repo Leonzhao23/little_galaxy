@@ -52,6 +52,8 @@ import com.little.galaxy.adaptors.ReminderOnDemandNewViewAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandPagerAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandStartViewAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandViewAdaptor;
+import com.little.galaxy.annotations.LockNeeded;
+import com.little.galaxy.annotations.LockUsed;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.local.services.ReminderOnDemandServiceConnection;
 import com.little.galaxy.storages.DBServiceFactory;
@@ -69,11 +71,14 @@ public class ReminderOnDemandActivity extends Activity {
     private ListView reminderStartListView = null;
     private ListView reminderCancelListView = null;
     private ListView reminderDoneListView = null;
-    private LinkedList<ReminderOnDemandEntity> doneEntities = new LinkedList<ReminderOnDemandEntity>();
     
-    //locks
-    private ReentrantLock refreshLock = new ReentrantLock();
-    private ReentrantLock loadMoreLock = new ReentrantLock();
+    //lock
+    final private ReentrantLock lock = new ReentrantLock();
+    @LockNeeded("lock") final private LinkedList<ReminderOnDemandEntity> doneEntities = new LinkedList<ReminderOnDemandEntity>();
+    @LockNeeded("lock") private long ptrLatestExecTime = 0l;
+    @LockNeeded("lock") private long ptrLastExecTime = 0l;
+    private int doneListViewPullType = 0;// 1 stands for refreshing new, 2 stands for loading more
+    private float lastY = -1;
     //header view
     private View headerView = null;
     //footer view
@@ -82,10 +87,7 @@ public class ReminderOnDemandActivity extends Activity {
     private boolean pullLoading;
     private boolean isFooterReady = false;
  
-    private long ptrLatestExecTime = 0l;
-    private long ptrLastExecTime = 0l;
-    private int doneListViewPullType = 0;// 1 stands for refreshing new, 2 stands for loading more
-    private float lastY = -1;
+    
     private final static int PULL_LOAD_MORE_DELTA = 50;
     private final static float OFFSET_RADIO = 1.8f; 
     private static final int delta = 5;
@@ -211,23 +213,23 @@ public class ReminderOnDemandActivity extends Activity {
 		
 	};
 	
+	@LockUsed("lock")
 	private Runnable refreshDoneViewTask = new Runnable(){
-		
 		@Override
 		public void run() {
 			if (doneEntities.isEmpty()){
 				doneEntities.addAll(dbService.getDoneReminders("2", delta));
 				final int size = doneEntities.size();
 				if (doneEntities.size() > 0){
-					ptrLastExecTime = doneEntities.get(0).getExecTime();
-					ptrLatestExecTime = doneEntities.get(size -1).getExecTime();
+					ptrLatestExecTime = doneEntities.get(0).getExecTime();
+					ptrLastExecTime = doneEntities.get(size -1).getExecTime();
 				}
 				
 			} else{
 				List<ReminderOnDemandEntity> entities = null;
 				
 				if (doneListViewPullType == 1) {
-					refreshLock.lock();
+					lock.lock();
 					try{
 						entities = dbService.getLatestReminders("2", ptrLatestExecTime, delta);
 						final int size = entities.size();
@@ -242,12 +244,12 @@ public class ReminderOnDemandActivity extends Activity {
 							
 						}
 					} finally{
-						refreshLock.unlock();
+						lock.unlock();
 					}
 					
 					
 				} else if (doneListViewPullType == 2) {
-					loadMoreLock.lock();
+					lock.lock();
 					try{
 						entities = dbService.getOlderReminders("2", ptrLastExecTime, delta);
 						final int size = entities.size();
@@ -256,7 +258,7 @@ public class ReminderOnDemandActivity extends Activity {
 							doneEntities.addAll(entities);
 						}
 					}finally{
-						loadMoreLock.unlock();
+						lock.unlock();
 					}
 					
 				} 
@@ -406,39 +408,6 @@ public class ReminderOnDemandActivity extends Activity {
 	
 
 	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		if (lastY == -1){
-			lastY = event.getY();
-		}
-		switch (event.getAction()){
-		case MotionEvent.ACTION_DOWN:
-			 lastY = event.getRawY();
-		case MotionEvent.ACTION_MOVE:
-			 final float deltaY = event.getRawY() - lastY;
-             lastY = event.getRawY();
-             if (reminderDoneListView.getLastVisiblePosition() == reminderDoneListView.getCount() - 1
-                 || deltaY < 0) {
-            
-             }
-		default:
-			lastY = -1; 
-            if (reminderDoneListView.getFirstVisiblePosition() == 0) {
-                    if (headerView.getHeight() > 1) {
-                            
-                    }
-                   
-            } else if (reminderDoneListView.getLastVisiblePosition() == reminderDoneListView.getCount() - 1) {
-                   
-            }
-            break;	
-		
-		}
-		return super.onTouchEvent(event);
-	}
-
-
-
-	@Override
 	protected void onDestroy() {
     	Log.d(getClass().getSimpleName(), "onDestroy() invoked, timer.cancel() invoked");
     	if (dbService != null){
@@ -514,8 +483,43 @@ public class ReminderOnDemandActivity extends Activity {
          footerView = layoutInflater.inflate(R.layout.listview_footer, null);
          reminderDoneListView.addFooterView(footerView);
          footerView.setVisibility(View.INVISIBLE);
-         reminderDoneListView.setOnScrollListener(new ReminderOnDemandOnScrollAndTouch());
-         
+         reminderDoneListView.setOnScrollListener(new ReminderOnDemandOnScroll());
+         reminderDoneListView.setOnTouchListener(new OnTouchListener(){
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				if (lastY == -1){
+					lastY = event.getY();
+				}
+				switch (event.getAction()){
+				case MotionEvent.ACTION_DOWN:
+					 lastY = event.getRawY();
+					 break;
+				case MotionEvent.ACTION_MOVE:
+					 final float deltaY = event.getRawY() - lastY;
+		             lastY = event.getRawY();
+		             if (reminderDoneListView.getLastVisiblePosition() == reminderDoneListView.getCount() - 1
+		                 || deltaY < 0) {
+		            
+		             }
+		             break;
+				default:
+					lastY = -1; 
+		            if (reminderDoneListView.getFirstVisiblePosition() == 0) {
+		                    if (headerView.getHeight() > 1) {
+		                            
+		                    }
+		                   
+		            } else if (reminderDoneListView.getLastVisiblePosition() == reminderDoneListView.getCount() - 1) {
+		                   
+		            }
+		            break;	
+				
+				}
+				return false;
+			}
+        	 
+         });
 //         reminderNewListView.setOnItemClickListener(new OnItemClickListener(){
 //
 //			@Override
@@ -569,14 +573,14 @@ public class ReminderOnDemandActivity extends Activity {
             	new Thread(refreshCancelViewTask).start();
             	break;
             case 3:
-            	if (doneEntities == null){
+            	if (doneEntities.isEmpty()){
             		new Thread(refreshDoneViewTask).start();
             	}
             }
         }
     }
 	
-	private class ReminderOnDemandOnScrollAndTouch  implements OnScrollListener, OnTouchListener {
+	private class ReminderOnDemandOnScroll  implements OnScrollListener {
 
 		@Override
 		public void onScroll(AbsListView listview, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
@@ -616,38 +620,12 @@ public class ReminderOnDemandActivity extends Activity {
 			        	if (headerView != null){
 			        		headerView.setVisibility(View.INVISIBLE);
 						}
-			        }
-					
+			        }		
 
 			     break;
-			}
+			}			
 			
-		 		
-			
-		}
-
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			switch (event.getAction()){
-			case MotionEvent.ACTION_DOWN:
-				 lastY = event.getRawY();
-			case MotionEvent.ACTION_MOVE:
-				 final float deltaY = event.getRawY() - lastY;
-                 lastY = event.getRawY();
-                 if (reminderDoneListView.getLastVisiblePosition() == reminderDoneListView.getCount() - 1
-                     || deltaY < 0) {
-                
-                 }
-			default:
-					
-			
-			}
-			return false;
-			
-		}
-
-		
-		
+		}	
 	}
     
 }
