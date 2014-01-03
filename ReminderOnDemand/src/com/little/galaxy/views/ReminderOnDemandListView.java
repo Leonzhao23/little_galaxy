@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -35,8 +36,8 @@ import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.storages.IDBService;
 
 public class ReminderOnDemandListView extends ListView implements OnScrollListener{
-	 Context ctx;
-	 Handler viewHandler;
+	private Context ctx;
+	private Handler viewHandler;
 	 //lock
     final private ReentrantLock lock = new ReentrantLock();
     @LockNeeded("lock") final private LinkedList<ReminderOnDemandEntity> doneEntities = new LinkedList<ReminderOnDemandEntity>();
@@ -81,10 +82,17 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 
 	public ReminderOnDemandListView(Context context) {
 		super(context);
-//		this.ctx = context;
-//		this.viewHandler = ((ReminderOnDemandActivity)context).getViewHandler();
-//		this.dbService = ((ReminderOnDemandActivity)context).getDBService();
-//		initViewElements(context);
+		initViewElements(context);
+	}
+	
+	public ReminderOnDemandListView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        initViewElements(context);
+	}
+
+	public ReminderOnDemandListView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        initViewElements(context);
 	}
 	
 	public void startInitDoneListView(){
@@ -92,6 +100,9 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 	}
 	
 	private void initViewElements(final Context context){
+		this.ctx = context;
+		this.viewHandler = ((ReminderOnDemandActivity)context).getViewHandler();
+		this.dbService = ((ReminderOnDemandActivity)context).getDBService();
 		scroller = new Scroller(context, new DecelerateInterpolator());
 		 
 		LayoutInflater layoutInflater = LayoutInflater.from(context);
