@@ -11,13 +11,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 
 import android.app.Activity;
 import android.content.Context;
@@ -38,9 +36,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
@@ -52,13 +47,13 @@ import com.little.galaxy.adaptors.ReminderOnDemandNewViewAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandPagerAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandStartViewAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandViewAdaptor;
-import com.little.galaxy.annotations.LockNeeded;
 import com.little.galaxy.annotations.LockUsed;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.local.services.ReminderOnDemandServiceConnection;
 import com.little.galaxy.storages.DBServiceFactory;
 import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
+import com.little.galaxy.views.ReminderOnDemandListView;
 
 public class ReminderOnDemandActivity extends Activity {
 	
@@ -70,27 +65,7 @@ public class ReminderOnDemandActivity extends Activity {
     private ListView reminderNewListView = null;
     private ListView reminderStartListView = null;
     private ListView reminderCancelListView = null;
-    private ListView reminderDoneListView = null;
-    
-    //lock
-    final private ReentrantLock lock = new ReentrantLock();
-    @LockNeeded("lock") final private LinkedList<ReminderOnDemandEntity> doneEntities = new LinkedList<ReminderOnDemandEntity>();
-    @LockNeeded("lock") private long ptrLatestExecTime = 0l;
-    @LockNeeded("lock") private long ptrLastExecTime = 0l;
-    private int doneListViewPullType = 0;// 1 stands for refreshing new, 2 stands for loading more
-    private float lastY = -1;
-    //header view
-    private View headerView = null;
-    //footer view
-    private View footerView = null;
-    private boolean enablePullLoad;
-    private boolean pullLoading;
-    private boolean isFooterReady = false;
- 
-    
-    private final static int PULL_LOAD_MORE_DELTA = 50;
-    private final static float OFFSET_RADIO = 1.8f; 
-    private static final int delta = 5;
+    private ReminderOnDemandListView reminderDoneListView = null;
     
 	private IDBService dbService = null;
 	private RecordOnDemand recordOnDemand = null;
@@ -102,6 +77,14 @@ public class ReminderOnDemandActivity extends Activity {
 	
 	public Runnable getRefreshNewViewTask(){
 		return refreshNewViewTask;
+	}
+	
+	public Handler getViewHandler(){
+		return viewHandler;
+	}
+	
+	public IDBService getDBService(){
+		return dbService;
 	}
 	
 	
@@ -212,69 +195,6 @@ public class ReminderOnDemandActivity extends Activity {
 		}
 		
 	};
-	
-	@LockUsed("lock")
-	private Runnable refreshDoneViewTask = new Runnable(){
-		@Override
-		public void run() {
-			if (doneEntities.isEmpty()){
-				doneEntities.addAll(dbService.getDoneReminders("2", delta));
-				final int size = doneEntities.size();
-				if (doneEntities.size() > 0){
-					ptrLatestExecTime = doneEntities.get(0).getExecTime();
-					ptrLastExecTime = doneEntities.get(size -1).getExecTime();
-				}
-				
-			} else{
-				List<ReminderOnDemandEntity> entities = null;
-				
-				if (doneListViewPullType == 1) {
-					lock.lock();
-					try{
-						entities = dbService.getLatestReminders("2", ptrLatestExecTime, delta);
-						final int size = entities.size();
-						if (size > 0){
-							for (int index= size - 1; index >= 0; index--){
-								ReminderOnDemandEntity entity = entities.get(index);
-								doneEntities.addFirst(entity);
-								if (index == 0){
-									ptrLatestExecTime = entity.getExecTime();
-								}
-							}
-							
-						}
-					} finally{
-						lock.unlock();
-					}
-					
-					
-				} else if (doneListViewPullType == 2) {
-					lock.lock();
-					try{
-						entities = dbService.getOlderReminders("2", ptrLastExecTime, delta);
-						final int size = entities.size();
-						if (size > 0){
-							ptrLastExecTime = entities.get(0).getExecTime();
-							doneEntities.addAll(entities);
-						}
-					}finally{
-						lock.unlock();
-					}
-					
-				} 
-			}
-			ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandDoneViewAdaptor(
-													reminderDoneListView.getContext(), 
-													doneEntities);	
-			if (Log.isLoggable(TAG_THREAD, Log.DEBUG)){
-				Log.d(TAG_THREAD, "Thread refreshDoneViewTask");
-			}
-			Message msg= Message.obtain(viewHandler, 3, adaptor);
-			viewHandler.sendMessage(msg);	
-		}
-		
-	};
-	
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -466,60 +386,15 @@ public class ReminderOnDemandActivity extends Activity {
          viewPager = (ViewPager)findViewById(R.id.viewPager); 
          
          reminderNewListView = (ListView) 
-         		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
+         		 (layoutInflater.inflate(R.layout.common_list_view, null).findViewById(R.id.listView));
          
          reminderStartListView = (ListView) 
-         		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
+         		 (layoutInflater.inflate(R.layout.common_list_view, null).findViewById(R.id.listView));
          
          reminderCancelListView = (ListView) 
-         		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
-         
-         reminderDoneListView = (ListView) 
-         		 (layoutInflater.inflate(R.layout.activity_reminder_on_demand_view, null).findViewById(R.id.listView));
-         
-         headerView = layoutInflater.inflate(R.layout.listview_header, null);
-         reminderDoneListView.addHeaderView(headerView);
-         
-         footerView = layoutInflater.inflate(R.layout.listview_footer, null);
-         reminderDoneListView.addFooterView(footerView);
-         footerView.setVisibility(View.INVISIBLE);
-         reminderDoneListView.setOnScrollListener(new ReminderOnDemandOnScroll());
-         reminderDoneListView.setOnTouchListener(new OnTouchListener(){
-
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if (lastY == -1){
-					lastY = event.getY();
-				}
-				switch (event.getAction()){
-				case MotionEvent.ACTION_DOWN:
-					 lastY = event.getRawY();
-					 break;
-				case MotionEvent.ACTION_MOVE:
-					 final float deltaY = event.getRawY() - lastY;
-		             lastY = event.getRawY();
-		             if (reminderDoneListView.getLastVisiblePosition() == reminderDoneListView.getCount() - 1
-		                 || deltaY < 0) {
-		            
-		             }
-		             break;
-				default:
-					lastY = -1; 
-		            if (reminderDoneListView.getFirstVisiblePosition() == 0) {
-		                    if (headerView.getHeight() > 1) {
-		                            
-		                    }
-		                   
-		            } else if (reminderDoneListView.getLastVisiblePosition() == reminderDoneListView.getCount() - 1) {
-		                   
-		            }
-		            break;	
-				
-				}
-				return false;
-			}
-        	 
-         });
+         		 (layoutInflater.inflate(R.layout.common_list_view, null).findViewById(R.id.listView));
+         reminderDoneListView = (ReminderOnDemandListView) 
+         		 (layoutInflater.inflate(R.layout.reminder_on_demand_list_view, null).findViewById(R.id.reminder_on_demand_listView1));
 //         reminderNewListView.setOnItemClickListener(new OnItemClickListener(){
 //
 //			@Override
@@ -547,6 +422,7 @@ public class ReminderOnDemandActivity extends Activity {
          Log.d(getClass().getSimpleName(), "onCreate() invoked, timer.schedule invoked");
         
     }
+   
 	
 	private class ReminderOnDemandPageChangeListener implements OnPageChangeListener{
         @Override
@@ -573,59 +449,10 @@ public class ReminderOnDemandActivity extends Activity {
             	new Thread(refreshCancelViewTask).start();
             	break;
             case 3:
-            	if (doneEntities.isEmpty()){
-            		new Thread(refreshDoneViewTask).start();
-            	}
+            	reminderDoneListView.startInitDoneListView();
+            	break;
             }
         }
     }
-	
-	private class ReminderOnDemandOnScroll  implements OnScrollListener {
-
-		@Override
-		public void onScroll(AbsListView listview, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-			
-		}
-
-		@Override
-		public void onScrollStateChanged(AbsListView listview, int scrollState) {
-			switch (scrollState){
-				case OnScrollListener.SCROLL_STATE_IDLE:
-					// for footer
-					if (listview.getLastVisiblePosition() == (listview.getCount() - 1)) {
-						if (footerView != null){
-							footerView.setVisibility(View.VISIBLE);
-						}
-						if (listview.getCount() < delta){
-							
-						} else{
-							doneListViewPullType = 2;
-							new Thread(refreshDoneViewTask).start();
-						}
-						
-					} else {
-						if (footerView != null){
-							footerView.setVisibility(View.INVISIBLE);
-						}
-					}
-					
-					// for header
-					if(listview.getFirstVisiblePosition() == 0){
-						if (headerView != null){
-			        		headerView.setVisibility(View.VISIBLE);
-						}
-						doneListViewPullType = 1;
-				        
-			        } else {
-			        	if (headerView != null){
-			        		headerView.setVisibility(View.INVISIBLE);
-						}
-			        }		
-
-			     break;
-			}			
-			
-		}	
-	}
     
 }

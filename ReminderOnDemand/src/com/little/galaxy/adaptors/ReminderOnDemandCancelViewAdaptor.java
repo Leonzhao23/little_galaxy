@@ -34,7 +34,7 @@ public class ReminderOnDemandCancelViewAdaptor extends
 	@Override
 	protected View initView() {
 		LayoutInflater layoutInflater = LayoutInflater.from(context);
-		View view = layoutInflater.inflate(R.layout.reminder_cancel_listview, null);
+		View view = layoutInflater.inflate(R.layout.reminder_cancel_listview_item, null);
 		return view;
 	}
 

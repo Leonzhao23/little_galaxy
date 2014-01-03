@@ -42,7 +42,7 @@ public class ReminderOnDemandNewViewAdaptor extends ReminderOnDemandViewAdaptor 
 	@Override
 	protected View initView() {
 		LayoutInflater layoutInflater = LayoutInflater.from(context);
-		View view = layoutInflater.inflate(R.layout.reminder_new_listview, null);
+		View view = layoutInflater.inflate(R.layout.reminder_new_listview_item, null);
 		return view;
 	}
 
