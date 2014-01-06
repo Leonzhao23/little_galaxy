@@ -394,7 +394,7 @@ public class ReminderOnDemandActivity extends Activity {
          reminderCancelListView = (ListView) 
          		 (layoutInflater.inflate(R.layout.common_list_view, null).findViewById(R.id.listView));
          reminderDoneListView = (ReminderOnDemandListView) 
-         		 (layoutInflater.inflate(R.layout.reminder_on_demand_list_view, null).findViewById(R.id.reminder_on_demand_listView1));
+         		 (layoutInflater.inflate(R.layout.reminder_on_demand_list_view, null).findViewById(R.id.reminder_on_demand_listView));
 //         reminderNewListView.setOnItemClickListener(new OnItemClickListener(){
 //
 //			@Override

@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.RotateAnimation;
@@ -33,6 +34,7 @@ import com.little.galaxy.adaptors.ReminderOnDemandViewAdaptor;
 import com.little.galaxy.annotations.LockNeeded;
 import com.little.galaxy.annotations.LockUsed;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
+import com.little.galaxy.layouts.ReminderOnDemandFooterViewLinearLayout;
 import com.little.galaxy.storages.IDBService;
 
 public class ReminderOnDemandListView extends ListView implements OnScrollListener{
@@ -48,21 +50,24 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
     private RefreshDoneListViewThread freshThread = null;
     
     private Scroller scroller;
-    private DownListViewState state = DownListViewState.DONE;
+    private DownListViewState state = DownListViewState.NORMAL;
     private float lastY = -1;
     private int totalItemNum;
     //header view
     private View headerView = null;
+    private LinearLayout composite;
     private TextView tipsTextview;  
     private TextView lastUpdatedTextView;  
     private ImageView arrowImageView;  
     private ProgressBar progressBar;  
     private int headerViewHeight;
     //footer view
-    private View footerView = null;
-    private boolean enablePullLoad;
-    private boolean pullLoading;
-    private boolean isFooterReady = false;
+    private ReminderOnDemandFooterViewLinearLayout footerView = null;
+    private boolean pullRefreshing = false;
+    private boolean enablePullRefresh = true;
+    private boolean pullLoading = false;
+    private boolean enablePullLoad = true;
+    private boolean enableFooterView = true;
     
     private Animation rotateUpAnim;
     private Animation rotateDownAnim;
@@ -75,8 +80,8 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 
     private final static int SCROLL_DURATION = 400; 
     private final static int PULL_LOAD_MORE_DELTA = 50;
-    private final static float OFFSET_RADIO = 1.8f; 
-    private final static int delta = 5;
+    private final static float OFFSET_RADIO = 1.8f;
+    private final static int DELTA = 1;
     
 	private IDBService dbService = null;
 
@@ -100,23 +105,30 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 	}
 	
 	private void initViewElements(final Context context){
-		this.ctx = context;
-		this.viewHandler = ((ReminderOnDemandActivity)context).getViewHandler();
-		this.dbService = ((ReminderOnDemandActivity)context).getDBService();
+		ctx = context;
+		viewHandler = ((ReminderOnDemandActivity)context).getViewHandler();
+		dbService = ((ReminderOnDemandActivity)context).getDBService();
 		scroller = new Scroller(context, new DecelerateInterpolator());
 		 
 		LayoutInflater layoutInflater = LayoutInflater.from(context);
 		headerView = layoutInflater.inflate(R.layout.listview_header, null);
+		composite = (LinearLayout)headerView.findViewById(R.id.listview_header_composite);
 		arrowImageView = (ImageView)headerView.findViewById(R.id.listview_header_arrow);
 		tipsTextview = (TextView)headerView.findViewById(R.id.listview_header_hint_textview);
 		lastUpdatedTextView = (TextView)headerView.findViewById(R.id.listview_header_time);
 		progressBar = (ProgressBar)headerView.findViewById(R.id.listview_header_progressbar);
-		headerViewHeight = headerView.getHeight();
-        this.addHeaderView(headerView);
+		headerView.setVisibility(View.INVISIBLE);
+        addHeaderView(headerView);
         
-        footerView = layoutInflater.inflate(R.layout.listview_footer, null);
-        this.addFooterView(footerView);
-        footerView.setVisibility(View.INVISIBLE);
+        footerView = new ReminderOnDemandFooterViewLinearLayout(context);
+        footerView.setViewState(DownListViewState.NORMAL);
+        footerView.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				onLoad();
+			}
+        	
+        });
         
         rotateUpAnim = new RotateAnimation(0.0f, -180.0f,
                 Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
@@ -126,6 +138,17 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
                 Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         rotateDownAnim.setDuration(ROTATE_ANIM_DURATION);
         rotateDownAnim.setFillAfter(true);
+        
+        //init header height
+        headerView.getViewTreeObserver().addOnGlobalLayoutListener(
+                   new OnGlobalLayoutListener() {
+                       @Override
+                       public void onGlobalLayout() {
+                    	   headerViewHeight = composite.getHeight();
+                    	   setVisiableHeaderHeight(0);//invisible by default.
+                           getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                      }
+        });
 	}
 	
 	
@@ -138,13 +161,14 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
                     //footerView.setBottomMargin(scroller.getCurrY());
             }
             postInvalidate();
-            //invokeOnScrolling();
 		}
 		super.computeScroll();     
     }
 
 	private void updateHeaderHeight(float delta) {
-        setVisiableHeaderHeight((int) delta + getVisiableHeaderHeight());
+		int height = (int) delta + getVisiableHeaderHeight();
+        setVisiableHeaderHeight(height >  headerViewHeight ?  headerViewHeight: height);
+        setSelection(0);
     }
 	
 	private void resetHeaderHeight() {
@@ -152,7 +176,7 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
         if (height == 0) 
                 return;
         // refreshing and header isn't shown fully. do nothing.
-        if (height <= headerViewHeight) {
+        if (pullRefreshing && height <= headerViewHeight) {
                 return;
         }
         int finalHeight = 0;
@@ -169,13 +193,13 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
          if (height < 0){
         	 height = 0;
          }
-         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) headerView.getLayoutParams();
+         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)composite.getLayoutParams();
          lp.height = height;
-         headerView.setLayoutParams(lp);
+         composite.setLayoutParams(lp);
 	 }
 
 	 private int getVisiableHeaderHeight() {
-         return headerView.getHeight();
+         return composite.getHeight();
 	 }
 	
 	
@@ -191,49 +215,65 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 			 break;
 		case MotionEvent.ACTION_MOVE:
 			 final float deltaY = event.getRawY() - lastY;
-             lastY = event.getRawY();
-             if (getFirstVisiblePosition() == 0  && getVisiableHeaderHeight() > 0) {
+			 Log.v("Move", "deltaY=" + deltaY + ",headerViewHeight=" + headerViewHeight);
+            //v lastY = event.getRawY();
+             if (getFirstVisiblePosition() == 0  
+            		 && (getVisiableHeaderHeight() > 0 || deltaY > 0)
+            		 && enablePullRefresh) {
             	 switch (state){
-            	 case DONE:
+            	 case NORMAL:
             		 changeHeaderViewByState(DownListViewState.PULL_TO_REFRESH);
             		 break;
             	 case PULL_TO_REFRESH:
-            		 if (deltaY / OFFSET_RADIO >= headerViewHeight){
+            		 if (headerViewHeight > 0 && deltaY / OFFSET_RADIO >= headerViewHeight){
             			 changeHeaderViewByState(DownListViewState.RELEASE_TO_REFRESH);
             		 } else if (deltaY <= 0){
-            			 changeHeaderViewByState(DownListViewState.DONE);
+            			 changeHeaderViewByState(DownListViewState.NORMAL);
             		 }
             		 break;
             	 case RELEASE_TO_REFRESH:
-            		 if (deltaY / OFFSET_RADIO < headerViewHeight && deltaY > 0){
+            		 if (headerViewHeight > 0 && deltaY / OFFSET_RADIO < headerViewHeight && deltaY > 0){
             			 changeHeaderViewByState(DownListViewState.PULL_TO_REFRESH);
             		 } else if (deltaY <= 0){
-            			 changeHeaderViewByState(DownListViewState.DONE);
+            			 changeHeaderViewByState(DownListViewState.NORMAL);
             		 }
             		 break;
             	 default:
             		 break;
             		 
             	 }
-                 updateHeaderHeight(deltaY / OFFSET_RADIO);
-             } else if (getLastVisiblePosition() == totalItemNum){
+            	 updateHeaderHeight(deltaY / OFFSET_RADIO);
+             } else if (getLastVisiblePosition() == getCount() - 1
+            		 && (footerView.getBottomMargin() > 0 || deltaY < 0)
+            		 && enablePullLoad){           	 
             	 
+            	 updateFooterHeight(-deltaY / OFFSET_RADIO);
+            	 if (footerView.getBottomMargin() > PULL_LOAD_MORE_DELTA) { // height enough to invoke load
+                     footerView.setViewState(DownListViewState.LOADING);
+                 } else {
+                     footerView.setViewState(DownListViewState.NORMAL);
+                 }       
+            	
              }
              break;
 		default:
 			lastY = -1; 
-            if (getFirstVisiblePosition() == 0) {
-            	if (state == DownListViewState.PULL_TO_REFRESH){
-            		changeHeaderViewByState(DownListViewState.DONE);
-            	}	
+            if (getFirstVisiblePosition() == 0 && enablePullRefresh) {	
             	if (state == DownListViewState.RELEASE_TO_REFRESH){
             		changeHeaderViewByState(DownListViewState.REFRESHING);
+            		pullRefreshing = true;
             		onRefresh();
+            	} else{
+            		changeHeaderViewByState(DownListViewState.NORMAL);
             	}
                 resetHeaderHeight();
                    
             } else if (getLastVisiblePosition() == getCount() - 1) {
-                   
+            	if (enablePullLoad && footerView.getBottomMargin() > PULL_LOAD_MORE_DELTA){
+            		pullLoading = true;
+            		onLoad();
+            	}
+            	resetFooterHeight();
             }
             break;	
 		
@@ -249,7 +289,8 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 	@Override
 	public void onScrollStateChanged(AbsListView listview, int scrollState) {
 		
-		
+		int state = scrollState;
+		int count = getCount();
 //		switch (scrollState){
 //			case OnScrollListener.SCROLL_STATE_IDLE:
 //				// for footer
@@ -299,8 +340,7 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 	    	public void run(){
 	    		lock.lock();
 				try{
-					List<ReminderOnDemandEntity> entities = null;
-					entities = dbService.getLatestReminders("2", ptrLatestExecTime, delta);
+					List<ReminderOnDemandEntity> entities =dbService.getLatestReminders("2", ptrLatestExecTime, DELTA);
 					final int size = entities.size();
 					if (size > 0){
 						for (int index= size - 1; index >= 0; index--){
@@ -313,6 +353,7 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 						
 					}
 				} finally{
+					onStopRefresh();
 					lock.unlock();
 				}	
 				ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandDoneViewAdaptor(
@@ -322,7 +363,7 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 					Log.d(TAG_THREAD, "Thread RefreshDoneListViewThread");
 				}
 				Message msg= Message.obtain(viewHandler, 3, adaptor);
-				viewHandler.sendMessage(msg);	
+				viewHandler.sendMessage(msg);
 	    	}
 	    }
 	    
@@ -332,14 +373,14 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 	    	public void run(){
 	    		lock.lock();
 				try{
-					List<ReminderOnDemandEntity> entities = null;
-					entities = dbService.getOlderReminders("2", ptrLastExecTime, delta);
+					List<ReminderOnDemandEntity> entities = dbService.getOlderReminders("2", ptrLastExecTime, DELTA);
 					final int size = entities.size();
 					if (size > 0){
 						ptrLastExecTime = entities.get(0).getExecTime();
 						doneEntities.addAll(entities);
 					}
 				}finally{
+					onStopLoad();
 					lock.unlock();
 				}
 				ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandDoneViewAdaptor(
@@ -359,13 +400,16 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 	    	@LockUsed("lock")
 			public void run() {
 				if (doneEntities.isEmpty()){
-					doneEntities.addAll(dbService.getDoneReminders("2", delta));
-					final int size = doneEntities.size();
-					if (doneEntities.size() > 0){
-						ptrLatestExecTime = doneEntities.get(0).getExecTime();
-						ptrLastExecTime = doneEntities.get(size -1).getExecTime();
+					List<ReminderOnDemandEntity> entities = dbService.getDoneReminders("2", DELTA);
+					final int initFetchSize = entities.size();
+					if (initFetchSize > 0){
+						ptrLatestExecTime = entities.get(0).getExecTime();
+						ptrLastExecTime = entities.get(initFetchSize -1).getExecTime();
+						doneEntities.addAll(entities);
 					}
-					
+					if (initFetchSize == DELTA){
+						addFooterView(footerView);
+					}	
 				} 
 				if (!doneEntities.isEmpty()){
 					ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandDoneViewAdaptor(
@@ -381,19 +425,49 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 			}
 	    }
 	    
-	    private void onRefresh(){
-	    	if (freshThread == null){
-    			freshThread = new RefreshDoneListViewThread();
-    		}
-    		freshThread.start();
+	    private void updateFooterHeight(float delta) {
+            int height = footerView.getBottomMargin() + (int) delta;
+            footerView.setBottomMargin(height);
+	    }
+	    
+	    private void resetFooterHeight() {
+            int bottomMargin = footerView.getBottomMargin();
+            if (bottomMargin > 0) {
+                    scrollBack = SCROLLBACK_FOOTER;
+                    scroller.startScroll(0, bottomMargin, 0, -bottomMargin,
+                                    SCROLL_DURATION);
+                    invalidate();
+            }
+	    }
+	    
+	    private void onStopRefresh(){
+	    	if(pullRefreshing){
+	    		pullRefreshing = false;
+	    		enablePullRefresh = true;
+	            resetHeaderHeight();
+	    	}
 	    	
 	    }
 	    
+	    private void onStopLoad(){
+	    	if(pullLoading){
+	    		pullLoading = false;
+	    		enablePullLoad = true;
+	            resetFooterHeight();
+	    	}
+	    	
+	    }
+	    
+	    private void onRefresh(){
+	    	freshThread = new RefreshDoneListViewThread();
+	    	freshThread.start();	
+	    	enablePullRefresh = false;
+	    }
+	    
 	    private void onLoad(){
-	    	if (loadThread == null){
-	    		loadThread = new LoadMoreDoneListViewThread();
-    		}
-	    	loadThread.start();
+	    	loadThread = new LoadMoreDoneListViewThread();
+	    	loadThread.start(); 
+	    	enablePullLoad = false;
 	    }
 	    
 	    private void changeHeaderViewByState(DownListViewState lstate) {  
@@ -402,6 +476,14 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 	    	}
 	    	
 	        switch (lstate) {  
+	        case NORMAL:  
+	        	//headerView.setPadding(0, -1 * headerViewHeight, 0, 0);  
+	            progressBar.setVisibility(View.GONE);  
+	            arrowImageView.setVisibility(View.INVISIBLE);
+	            arrowImageView.clearAnimation();
+	            tipsTextview.setVisibility(View.INVISIBLE); 
+	            lastUpdatedTextView.setVisibility(View.INVISIBLE);  
+	            break;
 	        case PULL_TO_REFRESH:  
 	            progressBar.setVisibility(View.GONE);  
 	            tipsTextview.setVisibility(View.VISIBLE);  
@@ -429,15 +511,8 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 	            arrowImageView.setVisibility(View.GONE);  
 	            tipsTextview.setText("refreshing");  
 	            lastUpdatedTextView.setVisibility(View.VISIBLE);  
+	            lastUpdatedTextView.setText("last updated time");
 	            break;  
-	            
-	        case DONE:  
-	        	headerView.setPadding(0, -1 * headerViewHeight, 0, 0);  
-	            progressBar.setVisibility(View.GONE);  
-	            arrowImageView.clearAnimation();
-	            tipsTextview.setText("drop down refresh");  
-	            lastUpdatedTextView.setVisibility(View.VISIBLE);  
-	            break;
 	            
 			default:
 				break;  
@@ -445,11 +520,11 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 	        this.state = lstate;
 	    }  
 	    
-	    private enum DownListViewState{
+	    public enum DownListViewState{
+	    	NORMAL,
 	    	PULL_TO_REFRESH,  
 	    	RELEASE_TO_REFRESH,
 	        REFRESHING,
-	        DONE,
 	        LOADING,
 	    }
 

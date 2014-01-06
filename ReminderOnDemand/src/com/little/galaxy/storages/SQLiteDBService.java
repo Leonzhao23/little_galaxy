@@ -287,8 +287,8 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 		            	String name = c.getString(1);
 		            	String desc = c.getString(2);
 		            	String recordLoc = c.getString(3);
-		            	int createTime = c.getInt(4);
-		            	int execTime = c.getInt(5);
+		            	long createTime = c.getLong(4);
+		            	long execTime = c.getLong(5);
 		            	int interval = c.getInt(6);
 		            	int frequency = c.getInt(7);
 		            	int autoStartTime = c.getInt(8);

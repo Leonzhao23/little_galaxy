@@ -3,7 +3,7 @@
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 
-	<com.little.galaxy.views.ReminderOnDemandListView android:id="@+id/reminder_on_demand_listView1"
+	<com.little.galaxy.views.ReminderOnDemandListView android:id="@+id/reminder_on_demand_listView"
 		android:layout_width="fill_parent"
 		android:layout_height="0dp">
     </com.little.galaxy.views.ReminderOnDemandListView>

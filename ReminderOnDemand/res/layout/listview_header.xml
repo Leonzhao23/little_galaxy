@@ -1,42 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:orientation="vertical" >
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+    <LinearLayout
+        android:id="@+id/listview_header_composite"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
     
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom|center"
             android:orientation="vertical" android:id="@+id/listview_header">
+            <LinearLayout 
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:gravity="center">
+                <ImageView
+            		android:id="@+id/listview_header_arrow"
+            		android:layout_width="wrap_content"
+           			android:layout_height="wrap_content"
+          			android:src="@drawable/drop_down_list_arrow" />
 
-            <TextView
-                android:id="@+id/listview_header_hint_textview"
+           		<ProgressBar
+            		android:id="@+id/listview_header_progressbar"
+            		android:layout_width="30dp"
+            		android:layout_height="30dp"
+            		android:visibility="invisible"/>
+           		<TextView
+                	android:id="@+id/listview_header_hint_textview"
+                	android:layout_width="wrap_content"
+                	android:layout_height="wrap_content"
+                	android:text="@string/listview_header_hint_normal" />
+            </LinearLayout>
+			<TextView
+                android:id="@+id/listview_header_current_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="invisible"
-                android:text="@string/listview_header_hint_normal" />
-
+                android:text="current time"
+                android:textSize="12sp" /> 
             <TextView
                 android:id="@+id/listview_header_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="invisible"
+                android:text="last updatd time"
                 android:textSize="12sp" />     
         </LinearLayout>
-
-        <ImageView
-            android:id="@+id/listview_header_arrow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-             android:visibility="invisible"
-            android:src="@drawable/drop_down_list_arrow" />
-
-        <ProgressBar
-            android:id="@+id/listview_header_progressbar"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:visibility="invisible" />
-    
+        
+    </LinearLayout>
 
 </LinearLayout>
