@@ -17,7 +17,7 @@ import android.widget.Spinner;
 
 import com.little.galaxy.R;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
-import com.little.galaxy.storages.DBServiceFactory;
+import com.little.galaxy.storages.DBServiceProvider;
 import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
 
@@ -40,7 +40,7 @@ public class ReminderOnDemandSettingsActivity extends Activity {
         spinnerFrequency = (Spinner) findViewById(R.id.spinner_frequency); 
         spinnerAutoStart = (Spinner) findViewById(R.id.spinner_auto_start); 
         
-        dbService = DBServiceFactory.getDBService(DBType.SQLite, ReminderOnDemandSettingsActivity.this);
+        dbService = DBServiceProvider.getDBService(DBType.SQLite, ReminderOnDemandSettingsActivity.this);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ReminderOnDemandSettingsActivity.this);
         long id = this.getIntent().getLongExtra("newReminderId", System.currentTimeMillis());
         

@@ -16,7 +16,7 @@ import android.widget.ListView;
 import com.little.galaxy.R;
 import com.little.galaxy.adaptors.ReminderOnDemandViewAdaptor;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
-import com.little.galaxy.storages.DBServiceFactory;
+import com.little.galaxy.storages.DBServiceProvider;
 import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
 
@@ -49,7 +49,7 @@ public class ReminderOnDemandViewActivity extends ListActivity {
         listView.setItemsCanFocus(false);
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         type = getIntent().getStringExtra("type");
-        dbService = DBServiceFactory.getDBService(DBType.SQLite, ReminderOnDemandViewActivity.this);
+        dbService = DBServiceProvider.getDBService(DBType.SQLite, ReminderOnDemandViewActivity.this);
 	}
 	
 	@Override
@@ -101,9 +101,7 @@ public class ReminderOnDemandViewActivity extends ListActivity {
 
 	@Override
 	protected void onDestroy() {
-		if (dbService != null){
-			dbService.cleanup();
-		}
+    	DBServiceProvider.closeDBService(DBType.SQLite);
 		super.onDestroy();
 	}
 	

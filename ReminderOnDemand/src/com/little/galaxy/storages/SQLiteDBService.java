@@ -14,7 +14,7 @@ import android.util.Log;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
 import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_DB;
 
-public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
+class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 
 
 	public static final String DB_NAME = "reminder_db";
@@ -34,9 +34,7 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 	
 	public SQLiteDBService(final Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
-		if (db == null){
-			db = getWritableDatabase();
-		}
+		db = getWritableDatabase();
 	}
 	
 	@Override
@@ -325,7 +323,6 @@ public class SQLiteDBService extends SQLiteOpenHelper implements IDBService {
 		return getFilterReminders(sqlOfOlderReminders, filters);
 	}
 	
-	@Override
 	public void cleanup(){
 		if (db != null){
 			db.close();

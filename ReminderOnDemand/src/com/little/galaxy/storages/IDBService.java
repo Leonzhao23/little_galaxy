@@ -25,8 +25,6 @@ public interface IDBService {
 	public List<ReminderOnDemandEntity> getAllStartedReminders();
 	
 	public List<ReminderOnDemandEntity> getAllCancelledReminders();
-	
-	public void cleanup();
 
 	boolean updateStartTime(ReminderOnDemandEntity entity);
 

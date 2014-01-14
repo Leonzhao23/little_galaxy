@@ -3,6 +3,8 @@ package com.little.galaxy.utils;
 public interface ReminderOnDemandConsts {
 	static final String RECORD_PREFIX = "ReminderOnDemandRecord";
 	static final String RECORD_EXTENSION = ".mp3";
+	static final String RECORD_EXTENSION_RAW = ".raw";
+	static final String RECORD_EXTENSION_WAV = ".wav";
     static final int RETURN_CODE_FROM_SETTINGS = 10;
 	static final String TAG_EXEC = "EXEC";
 	static final String TAG_PAGE = "PAGE";
@@ -16,6 +18,8 @@ public interface ReminderOnDemandConsts {
 	static final String TAG_PLAY = "PLAY";
 	static final String TAG_THREAD ="THRE";
 	static final String TAG_MEDIA ="MEDI";
+	static final String TAG_NET = "NET";
+	static final String TAG_RECORD = "RECD";
 	
 
 }

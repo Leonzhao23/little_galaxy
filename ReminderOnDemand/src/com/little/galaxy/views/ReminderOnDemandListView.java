@@ -4,6 +4,7 @@ import static com.little.galaxy.utils.ReminderOnDemandConsts.TAG_THREAD;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import android.content.Context;
@@ -43,8 +44,8 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 	 //lock
     final private ReentrantLock lock = new ReentrantLock();
     @LockNeeded("lock") final private LinkedList<ReminderOnDemandEntity> doneEntities = new LinkedList<ReminderOnDemandEntity>();
-    @LockNeeded("lock") private long ptrLatestExecTime = 0l;
-    @LockNeeded("lock") private long ptrLastExecTime = 0l;
+    private AtomicLong ptrLatestExecTime = new AtomicLong(0);
+    private AtomicLong ptrLastExecTime = new AtomicLong(0);
     
     private LoadMoreDoneListViewThread loadThread = null;
     private RefreshDoneListViewThread freshThread = null;
@@ -158,7 +159,7 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
             if (scrollBack == SCROLLBACK_HEADER) {
                     setVisiableHeaderHeight(scroller.getCurrY());
             } else {
-                    //footerView.setBottomMargin(scroller.getCurrY());
+                    footerView.setBottomMargin(scroller.getCurrY());
             }
             postInvalidate();
 		}
@@ -334,28 +335,40 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 		
 	}
 	
+	@LockUsed("lock")
+	private void addFirst(final ReminderOnDemandEntity entity){
+		lock.lock();
+		try{
+			doneEntities.addFirst(entity);
+		} finally{
+			lock.unlock();
+		}	
+	}
+	
+	@LockUsed("lock")
+	private void addAll(List<ReminderOnDemandEntity> entities){
+		lock.lock();
+		try{
+			doneEntities.addAll(entities);
+		} finally{
+			lock.unlock();
+		}	
+	}
+	
 	  private class RefreshDoneListViewThread extends Thread{
 	    	@Override
-	    	@LockUsed("lock")
 	    	public void run(){
-	    		lock.lock();
-				try{
-					List<ReminderOnDemandEntity> entities =dbService.getLatestReminders("2", ptrLatestExecTime, DELTA);
-					final int size = entities.size();
-					if (size > 0){
-						for (int index= size - 1; index >= 0; index--){
-							ReminderOnDemandEntity entity = entities.get(index);
-							doneEntities.addFirst(entity);
-							if (index == 0){
-								ptrLatestExecTime = entity.getExecTime();
-							}
+	    		List<ReminderOnDemandEntity> entities =dbService.getLatestReminders("2", ptrLatestExecTime.get(), DELTA);
+				final int size = entities.size();
+				if (size > 0){
+					for (int index= size - 1; index >= 0; index--){
+						ReminderOnDemandEntity entity = entities.get(index);
+						if (index == 0){
+							ptrLatestExecTime.compareAndSet(ptrLatestExecTime.get(), entity.getExecTime());
 						}
-						
+						addFirst(entity);
 					}
-				} finally{
-					onStopRefresh();
-					lock.unlock();
-				}	
+				}
 				ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandDoneViewAdaptor(
 						ctx,
 						doneEntities);	
@@ -364,25 +377,20 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 				}
 				Message msg= Message.obtain(viewHandler, 3, adaptor);
 				viewHandler.sendMessage(msg);
+				onStopRefresh();
 	    	}
 	    }
 	    
 	    private class LoadMoreDoneListViewThread extends Thread{
 	    	@Override
-	    	@LockUsed("lock")
 	    	public void run(){
-	    		lock.lock();
-				try{
-					List<ReminderOnDemandEntity> entities = dbService.getOlderReminders("2", ptrLastExecTime, DELTA);
-					final int size = entities.size();
-					if (size > 0){
-						ptrLastExecTime = entities.get(0).getExecTime();
-						doneEntities.addAll(entities);
-					}
-				}finally{
-					onStopLoad();
-					lock.unlock();
-				}
+	    		List<ReminderOnDemandEntity> entities = dbService.getOlderReminders("2", ptrLastExecTime.get(), DELTA);
+				final int size = entities.size();
+				if (size > 0){
+					ptrLastExecTime.compareAndSet(ptrLastExecTime.get(), entities.get(0).getExecTime());
+					addAll(entities);
+				}	
+				
 				ReminderOnDemandViewAdaptor adaptor = new ReminderOnDemandDoneViewAdaptor(
 						ctx, 
 						doneEntities);	
@@ -391,6 +399,7 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 				}
 				Message msg= Message.obtain(viewHandler, 3, adaptor);
 				viewHandler.sendMessage(msg);	
+				onStopLoad();
 	    	}
 	    	
 	    }
@@ -403,8 +412,8 @@ public class ReminderOnDemandListView extends ListView implements OnScrollListen
 					List<ReminderOnDemandEntity> entities = dbService.getDoneReminders("2", DELTA);
 					final int initFetchSize = entities.size();
 					if (initFetchSize > 0){
-						ptrLatestExecTime = entities.get(0).getExecTime();
-						ptrLastExecTime = entities.get(initFetchSize -1).getExecTime();
+						ptrLatestExecTime.compareAndSet(0, entities.get(0).getExecTime());
+						ptrLastExecTime.compareAndSet(0, entities.get(initFetchSize -1).getExecTime());
 						doneEntities.addAll(entities);
 					}
 					if (initFetchSize == DELTA){

@@ -16,7 +16,7 @@ import com.little.galaxy.PlayOnDemand;
 import com.little.galaxy.R;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.services.ReminderOnDemandService;
-import com.little.galaxy.storages.DBServiceFactory;
+import com.little.galaxy.storages.DBServiceProvider;
 import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
 
@@ -51,9 +51,9 @@ public class ReminderOnDemandNewViewLayout extends LinearLayout{
         del.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				IDBService dbService = DBServiceFactory.getDBService(DBType.SQLite, context);
+				IDBService dbService = DBServiceProvider.getDBService(DBType.SQLite, context);
 				dbService.delete(entity.getId());
-				dbService.cleanup();
+				DBServiceProvider.closeDBService(DBType.SQLite);
 			}
         });
         
@@ -124,9 +124,9 @@ public class ReminderOnDemandNewViewLayout extends LinearLayout{
         int autoStartTime = entity.getAutoStartTime();
         if (autoStartTime != -1){
         
-            IDBService dbService = DBServiceFactory.getDBService(DBType.SQLite, context);
+            IDBService dbService = DBServiceProvider.getDBService(DBType.SQLite, context);
 			dbService.updateStartTime(entity);
-			dbService.cleanup();
+			DBServiceProvider.closeDBService(DBType.SQLite);
 		   
 			displayAutoStartTime(autoStartTime);
             if (autoStartTime < 1){

@@ -39,18 +39,19 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import com.little.galaxy.AudioRecordOnDemand;
 import com.little.galaxy.R;
 import com.little.galaxy.RecordOnDemand;
+import com.little.galaxy.VoiceRecognizeOnDemand;
 import com.little.galaxy.adaptors.ReminderOnDemandCancelViewAdaptor;
-import com.little.galaxy.adaptors.ReminderOnDemandDoneViewAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandNewViewAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandPagerAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandStartViewAdaptor;
 import com.little.galaxy.adaptors.ReminderOnDemandViewAdaptor;
-import com.little.galaxy.annotations.LockUsed;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
+import com.little.galaxy.exceptions.ReminderOnDemandException;
 import com.little.galaxy.local.services.ReminderOnDemandServiceConnection;
-import com.little.galaxy.storages.DBServiceFactory;
+import com.little.galaxy.storages.DBServiceProvider;
 import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
 import com.little.galaxy.views.ReminderOnDemandListView;
@@ -73,6 +74,9 @@ public class ReminderOnDemandActivity extends Activity {
 	private ReminderOnDemandServiceConnection conn = null;
 	private boolean bind = false;
 	private boolean canSpeechRecognized = false; 
+	private AudioRecordOnDemand audio;
+	private boolean recording = false;
+	
 	
 	
 	public Runnable getRefreshNewViewTask(){
@@ -201,7 +205,7 @@ public class ReminderOnDemandActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reminder_on_demand);
        
-        dbService = DBServiceFactory.getDBService(DBType.SQLite, ReminderOnDemandActivity.this);
+        dbService = DBServiceProvider.getDBService(DBType.SQLite, ReminderOnDemandActivity.this);
         recordOnDemand = new RecordOnDemand(this);
         
         initPagerViews();
@@ -246,13 +250,30 @@ public class ReminderOnDemandActivity extends Activity {
 //							}
 //						}
 //					}.start();
-					recordOnDemand.doRecording();
+				    audio = new AudioRecordOnDemand(ReminderOnDemandActivity.this.getFilesDir());
+					try {
+						audio.doRecording();
+						recording = true;
+					} catch (ReminderOnDemandException e) {
+						Log.w(TAG_ACTIVITY, "record the voice was failed, try again with Edit button latter");
+					}
+					//recordOnDemand.doRecording();
 					break;
 				}
 				case MotionEvent.ACTION_UP:
 				{
 					Log.d(getClass().getSimpleName(), "speakBtn Touch event: ACTION_UP");
-					String recordLoc = recordOnDemand.stopRecording();
+					//String recordLoc = recordOnDemand.stopRecording();
+					String recordLoc = "";
+					if (recording){
+						audio.stopRecording();
+						VoiceRecognizeOnDemand voice = new VoiceRecognizeOnDemand();
+						byte[] datas = audio.getWavData();
+						recordLoc = audio.getAudioLoc();
+						voice.startVoiceRecognizer(datas);
+					}
+					
+					
 					long id = System.currentTimeMillis();
 					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ReminderOnDemandActivity.this);
 					SimpleDateFormat sdf=new SimpleDateFormat("MM/dd HH:mm:ss");
@@ -331,7 +352,7 @@ public class ReminderOnDemandActivity extends Activity {
 	protected void onDestroy() {
     	Log.d(getClass().getSimpleName(), "onDestroy() invoked, timer.cancel() invoked");
     	if (dbService != null){
-    		dbService.cleanup();
+    		DBServiceProvider.closeDBService(DBType.SQLite);
     	} 	
     	if (bind){
     		unbindService(conn);	

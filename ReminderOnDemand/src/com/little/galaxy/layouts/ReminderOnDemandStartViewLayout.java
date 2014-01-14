@@ -19,7 +19,7 @@ import com.little.galaxy.entities.ReminderOnDemandEntity;
 import com.little.galaxy.entities.ReminderOnDemandEntity.ReminderState;
 import com.little.galaxy.local.services.ReminderOnDemandServiceConnection;
 import com.little.galaxy.services.IPlayService;
-import com.little.galaxy.storages.DBServiceFactory;
+import com.little.galaxy.storages.DBServiceProvider;
 import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
 
@@ -61,7 +61,7 @@ public class ReminderOnDemandStartViewLayout extends LinearLayout {
 					Log.e(TAG, "Call remote service stop() failed!");
 					e.printStackTrace();
 				}
-				IDBService dbService = DBServiceFactory.getDBService(DBType.SQLite, context);
+				IDBService dbService = DBServiceProvider.getDBService(DBType.SQLite, context);
 				dbService.updateByState(entity, ReminderState.Cancel.getState());
 			}
         });

@@ -26,7 +26,7 @@ import android.util.Log;
 
 import com.little.galaxy.R;
 import com.little.galaxy.entities.ReminderOnDemandEntity;
-import com.little.galaxy.storages.DBServiceFactory;
+import com.little.galaxy.storages.DBServiceProvider;
 import com.little.galaxy.storages.DBType;
 import com.little.galaxy.storages.IDBService;
 
@@ -51,7 +51,7 @@ public class ReminderOnDemandService extends Service {
 
 		@Override
 		public void run() {
-			sendNotification(R.drawable.ic_launcher, entity.getName(), entity.getRecoredLoc());
+			sendNotification(R.drawable.ic_launcher, entity.getName(), entity.getDesc());
 			mp = MediaPlayer.create(ReminderOnDemandService.this, recordLoc);	
 			try {
 				Log.d(TAG_MEDIA, "Begin play the reminder[" + entity.getName() +"]");
@@ -66,14 +66,14 @@ public class ReminderOnDemandService extends Service {
 
 	@Override
 	public void onCreate(){
-		//android.os.Debug.waitForDebugger();
+	//	android.os.Debug.waitForDebugger();
 		super.onCreate();
 		Log.d(TAG_SERVICE, "Service created!");
 		reminderOnDemandBind = new ReminderOnDemandBind();
 		ses = Executors.newSingleThreadScheduledExecutor(); 
 		scheduleMap = new ConcurrentHashMap<String, ScheduledFuture<?>>();
 		nm = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-		dbService = DBServiceFactory.getDBService(DBType.SQLite, ReminderOnDemandService.this);
+		dbService = DBServiceProvider.getDBService(DBType.SQLite, ReminderOnDemandService.this);
 		List <ReminderOnDemandEntity> reminders = dbService.getAllStartedReminders();
 		for (ReminderOnDemandEntity reminderOnDemandEntity : reminders) {
 			int interval  = reminderOnDemandEntity.getInterval();
@@ -155,9 +155,7 @@ public class ReminderOnDemandService extends Service {
 			mp = null;
 		}
 	
-		if (dbService != null){
-			dbService.cleanup();
-		}
+		DBServiceProvider.closeDBService(DBType.SQLite);
 		super.onDestroy();
 	}
 	
