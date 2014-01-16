@@ -34,8 +34,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
@@ -59,6 +60,8 @@ import com.little.galaxy.views.ReminderOnDemandListView;
 public class ReminderOnDemandActivity extends Activity {
 	
     private ImageButton speakBtn = null;
+    private ImageButton stopBtn = null;
+    private SurfaceView sfv = null;
     private ViewPager viewPager = null;
     private ArrayList<String> titles = null;
     private ArrayList<View> pagesArrayList;
@@ -226,93 +229,160 @@ public class ReminderOnDemandActivity extends Activity {
         	
         }
         
-        speakBtn = (ImageButton)findViewById(R.id.button1);
+        sfv = (SurfaceView) this.findViewById(R.id.surface_view_left); 
+        speakBtn = (ImageButton)findViewById(R.id.button_record);
+        stopBtn = (ImageButton)findViewById(R.id.button_stop);
        // stopBtn = (Button)findViewById(R.id.stop);
         //startReminderBtn = (Button)findViewById(R.id.button_start);
         //startReminderBtn.setVisibility(View.INVISIBLE);
        // doneReminderBtn = (Button)findViewById(R.id.button2);
         //doneReminderBtn.setVisibility(View.INVISIBLE);
-       
-        speakBtn.setOnTouchListener(new View.OnTouchListener() {
-			
+        speakBtn.setOnClickListener(new OnClickListener(){
+
 			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				Log.d(getClass().getSimpleName(), "speakBtn Touch event");
-				switch (event.getAction()){
-				case MotionEvent.ACTION_DOWN:
-				{
-					Log.d(getClass().getSimpleName(), "speakBtn Touch event: ACTION_DOWN");
-//					new Thread(){
-//						@Override
-//						public void run(){
-//							if (canSpeechRecognized){
-//								startVoiceRecognitionActivity();
-//							}
-//						}
-//					}.start();
-				    audio = new AudioRecordOnDemand(ReminderOnDemandActivity.this.getFilesDir());
-					try {
-						audio.doRecording();
-						recording = true;
-					} catch (ReminderOnDemandException e) {
-						Log.w(TAG_ACTIVITY, "record the voice was failed, try again with Edit button latter");
-					}
-					//recordOnDemand.doRecording();
-					break;
+			public void onClick(View view) {
+				audio = new AudioRecordOnDemand(ReminderOnDemandActivity.this.getFilesDir());
+				try {
+					audio.doRecording();
+					recording = true;
+					speakBtn.setImageDrawable(getResources().getDrawable(R.drawable.record_pause));
+				} catch (ReminderOnDemandException e) {
+					Log.w(TAG_ACTIVITY, "record the voice was failed, try again with Edit button latter");
 				}
-				case MotionEvent.ACTION_UP:
-				{
-					Log.d(getClass().getSimpleName(), "speakBtn Touch event: ACTION_UP");
-					//String recordLoc = recordOnDemand.stopRecording();
-					String recordLoc = "";
-					if (recording){
-						audio.stopRecording();
-						VoiceRecognizeOnDemand voice = new VoiceRecognizeOnDemand();
-						byte[] datas = audio.getWavData();
-						recordLoc = audio.getAudioLoc();
-						voice.startVoiceRecognizer(datas);
-					}
+				//recordOnDemand.doRecording();
 					
-					
-					long id = System.currentTimeMillis();
-					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ReminderOnDemandActivity.this);
-					SimpleDateFormat sdf=new SimpleDateFormat("MM/dd HH:mm:ss");
-					String name = sdf.format(new Date(id));
-					String desc = prefs.getString("desc", "This is your reminder");
-					String getStr = prefs.getString("interval", "15");
-					String getAutoStartTime = prefs.getString("start", "Never");
-					int interval = 15;
-					int autoStartTime = -1;
-					if (!getAutoStartTime.equals("Never")){
-						try{
-							autoStartTime = Integer.parseInt(getAutoStartTime);
-							interval = Integer.parseInt(getStr);
-						}catch(NumberFormatException nfe){
-							Log.w(this.getClass().getSimpleName(), "parse string to int error, use default value 15mins");
-						}
-					}
-				
-					ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, id, interval*60*1000, 1/*frequency=1*/, autoStartTime, 0/*state new*/);
-					dbService.insert(entity);
-					if (Log.isLoggable(TAG_ACTIVITY, Log.DEBUG)){
-						Log.d(TAG_ACTIVITY, "New reminder[" + name +"] created");
-					}	
-					
-					new Thread(refreshNewViewTask).start();
-					
-//					Intent intent = new Intent(ReminderOnDemandActivity.this, ReminderOnDemandSettingsActivity.class);
-//					intent.putExtra("recordLoc", recordLoc);
-//					ReminderOnDemandActivity.this.startActivityForResult(intent, RETURN_CODE_FROM_SETTINGS);
-					break;
-				}
-				default:
-				 	break;
-				}
-				return false;
 			}
-		});
         	
-    }
+        });
+        
+        stopBtn.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View view) {
+
+				Log.d(getClass().getSimpleName(), "speakBtn Touch event: ACTION_UP");
+				//String recordLoc = recordOnDemand.stopRecording();
+				String recordLoc = "";
+				if (recording){
+					audio.stopRecording();
+					VoiceRecognizeOnDemand voice = new VoiceRecognizeOnDemand();
+					byte[] datas = audio.getWavData();
+					recordLoc = audio.getAudioLoc();
+					voice.startVoiceRecognizer(datas);
+				}
+				
+				
+				long id = System.currentTimeMillis();
+				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ReminderOnDemandActivity.this);
+				SimpleDateFormat sdf=new SimpleDateFormat("MM/dd HH:mm:ss");
+				String name = sdf.format(new Date(id));
+				String desc = prefs.getString("desc", "This is your reminder");
+				String getStr = prefs.getString("interval", "15");
+				String getAutoStartTime = prefs.getString("start", "Never");
+				int interval = 15;
+				int autoStartTime = -1;
+				if (!getAutoStartTime.equals("Never")){
+					try{
+						autoStartTime = Integer.parseInt(getAutoStartTime);
+						interval = Integer.parseInt(getStr);
+					}catch(NumberFormatException nfe){
+						Log.w(this.getClass().getSimpleName(), "parse string to int error, use default value 15mins");
+					}
+				}
+			
+				ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, id, interval*60*1000, 1/*frequency=1*/, autoStartTime, 0/*state new*/);
+				dbService.insert(entity);
+				if (Log.isLoggable(TAG_ACTIVITY, Log.DEBUG)){
+					Log.d(TAG_ACTIVITY, "New reminder[" + name +"] created");
+				}	
+				
+				new Thread(refreshNewViewTask).start();
+			
+					
+			}
+        	
+        });
+       
+//        speakBtn.setOnTouchListener(new View.OnTouchListener() {
+//			
+//			@Override
+//			public boolean onTouch(View v, MotionEvent event) {
+//				Log.d(getClass().getSimpleName(), "speakBtn Touch event");
+//				switch (event.getAction()){
+//				case MotionEvent.ACTION_DOWN:
+//				{
+//					Log.d(getClass().getSimpleName(), "speakBtn Touch event: ACTION_DOWN");
+////					new Thread(){
+////						@Override
+////						public void run(){
+////							if (canSpeechRecognized){
+////								startVoiceRecognitionActivity();
+////							}
+////						}
+////					}.start();
+//				    audio = new AudioRecordOnDemand(ReminderOnDemandActivity.this.getFilesDir());
+//					try {
+//						audio.doRecording();
+//						recording = true;
+//					} catch (ReminderOnDemandException e) {
+//						Log.w(TAG_ACTIVITY, "record the voice was failed, try again with Edit button latter");
+//					}
+//					//recordOnDemand.doRecording();
+//					break;
+//				}
+//				case MotionEvent.ACTION_UP:
+//				{
+//					Log.d(getClass().getSimpleName(), "speakBtn Touch event: ACTION_UP");
+//					//String recordLoc = recordOnDemand.stopRecording();
+//					String recordLoc = "";
+//					if (recording){
+//						audio.stopRecording();
+//						VoiceRecognizeOnDemand voice = new VoiceRecognizeOnDemand();
+//						byte[] datas = audio.getWavData();
+//						recordLoc = audio.getAudioLoc();
+//						voice.startVoiceRecognizer(datas);
+//					}
+//					
+//					
+//					long id = System.currentTimeMillis();
+//					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ReminderOnDemandActivity.this);
+//					SimpleDateFormat sdf=new SimpleDateFormat("MM/dd HH:mm:ss");
+//					String name = sdf.format(new Date(id));
+//					String desc = prefs.getString("desc", "This is your reminder");
+//					String getStr = prefs.getString("interval", "15");
+//					String getAutoStartTime = prefs.getString("start", "Never");
+//					int interval = 15;
+//					int autoStartTime = -1;
+//					if (!getAutoStartTime.equals("Never")){
+//						try{
+//							autoStartTime = Integer.parseInt(getAutoStartTime);
+//							interval = Integer.parseInt(getStr);
+//						}catch(NumberFormatException nfe){
+//							Log.w(this.getClass().getSimpleName(), "parse string to int error, use default value 15mins");
+//						}
+//					}
+//				
+//					ReminderOnDemandEntity entity = new ReminderOnDemandEntity(id, name, desc, recordLoc, id, interval*60*1000, 1/*frequency=1*/, autoStartTime, 0/*state new*/);
+//					dbService.insert(entity);
+//					if (Log.isLoggable(TAG_ACTIVITY, Log.DEBUG)){
+//						Log.d(TAG_ACTIVITY, "New reminder[" + name +"] created");
+//					}	
+//					
+//					new Thread(refreshNewViewTask).start();
+//					
+////					Intent intent = new Intent(ReminderOnDemandActivity.this, ReminderOnDemandSettingsActivity.class);
+////					intent.putExtra("recordLoc", recordLoc);
+////					ReminderOnDemandActivity.this.startActivityForResult(intent, RETURN_CODE_FROM_SETTINGS);
+//					break;
+//				}
+//				default:
+//				 	break;
+//				}
+//				return false;
+//			}
+//		});
+
+   }
     
     
     
